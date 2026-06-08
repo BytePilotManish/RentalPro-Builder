@@ -1,0 +1,14 @@
+Line 101: const UI_TRANSLATIONS = {
+Line 272: const [language, setLanguage] = useState(() => localStorage.getItem("language") || "EN");
+Line 273: const t = (key) => UI_TRANSLATIONS[language]?.[key] || UI_TRANSLATIONS.EN[key];
+Line 276: localStorage.setItem("language", language);
+Line 277: }, [language]);
+Line 974: toast.show ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95 pointer-events-none"
+Line 1211: <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+Line 1223: {/* Language Pill */}
+Line 1226: const nextLang = language === "EN" ? "KN" : "EN";
+Line 1227: setLanguage(nextLang);
+Line 1228: showToast(`Language switched to ${nextLang === "EN" ? "English" : "Kannada (ಕನ್ನಡ)"}`, "success");
+Line 1233: <span>{language === "EN" ? "EN" : "KN"}</span>
+Line 1426: <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-extrabold px-2 py-1 rounded absolute -top-1 shadow dark:bg-slate-800 z-30 pointer-events-none transform -translate-y-2">
+Line 1985: <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 border border-slate-200/80 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80 dark:border-slate-800 transition-all hover:scale-[1.02] duration-200">

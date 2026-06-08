@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Pro - Agreement Customizer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-file-signature logo-icon"></i>
+                <span class="logo-text">RentalPro</span>
+                <span class="logo-sub">Agreement Builder</span>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-icon" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Panel: Form Customization -->
+            <section class="panel form-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-sliders-h icon-spacer"></i>Customize Details</h2>
+                    <p class="panel-subtitle">Fill in the fields below to customize your rental agreement template.</p>
+                </div>
+                <form id="agreement-form" class="agreement-form">
+                    <div id="form-categories" class="categories-container">
+                        <!-- Dynamic categories will be rendered here -->
+                        <div class="form-loading">
+                            <i class="fa-solid fa-circle-notch fa-spin spinner"></i>
+                            <span>Loading form categories...</span>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Panel: Preview & Print -->
+            <section class="panel preview-panel">
+                <div class="panel-header flex-header">
+                    <div>
+                        <h2><i class="fa-solid fa-eye icon-spacer"></i>Document Preview</h2>
+                        <p class="panel-subtitle">Review document draft text or print generated PDF.</p>
+                    </div>
+                    <!-- View toggle -->
+                    <div class="view-toggle-container">
+                        <button type="button" id="toggle-draft" class="toggle-btn active" data-view="draft">
+                            <i class="fa-solid fa-file-text"></i> Draft Text
+                        </button>
+                        <button type="button" id="toggle-pdf" class="toggle-btn" data-view="pdf" disabled>
+                            <i class="fa-solid fa-file-pdf"></i> PDF View
+                        </button>
+                    </div>
+                </div>
+
+                <div class="preview-viewport">
+                    <!-- HTML Live Draft Text Preview -->
+                    <div id="draft-view" class="preview-content draft-content active">
+                        <div class="rental-agreement-document">
+                            <h1 class="doc-title">RENTAL AGREEMENT</h1>
+                            
+                            <p class="doc-para">
+                                THIS RENTAL AGREEMENT is made and executed on this <span class="highlight" data-field="AGREEMENT_DATE">01ST Day of this April 2026</span>, at <span class="highlight" data-field="AGREEMENT_PLACE">Bangalore</span> by and between:
+                            </p>
+                            
+                            <p class="doc-para">
+                                <strong class="highlight" data-field="OWNER_NAME">Mr. MANOJ M & SANCHITHA C J</strong>, <span class="highlight" data-field="OWNER_PARENT">S/O T Mahesh</span>, Aged <span class="highlight" data-field="OWNER_AGE">45</span>, <span class="highlight" data-field="OWNER_ADDRESS">No,99,100 C Near Sri Kalikamba Temple, ChowdeshwariNagar, , Laggere, Bengaluru- 560 058</span>, hereinafter called as the "OWNER", ONE PART,
+                            </p>
+                            
+                            <p class="doc-para text-center"><strong>AND</strong></p>
+                            
+                            <p class="doc-para">
+                                <strong class="highlight" data-field="TENANT_NAME">Mr. RAJUGOWDA</strong> <span class="highlight" data-field="TENANT_PARENT">S/O Subbegowda</span>, Aged <span class="highlight" data-field="TENANT_AGE">47</span>, <span class="highlight" data-field="TENANT_ADDRESS">No. 18, 3rd Cross, Rajeev Gandhi Nagar, Laggere, Bengaluru-560 058</span>, hereinafter called as the TENANT, SECOND PART.
+                            </p>
+                            
+                            <p class="doc-para">
+                                The TENANT has approached and requested the OWNER to rent out the building for Commercial Purpose <span class="highlight" data-field="PREMISES_ADDRESS">No.99 & 100C, Near Sri Kalikamba Temple Chowdeshwari Nagar, Laggere, Bengaluru- 560 058</span>, Consists <span class="highlight" data-field="PREMISES_DESCRIPTION">One RCC Roofed Shops, with rolling Shutter and electricity, Toilet and water facility</span>, the Tenant has approached the owner let out the schedule shop premises for his <span class="highlight" data-field="BUSINESS_NAME">J S TRADERS</span> for Commercial Purpose, The OWNER has agreed for the same.
+                            </p>
+                            
+                            <p class="doc-para">
+                                The OWNER and the TENANT are making this Rental Agreement on the following terms and conditions:
+                            </p>
+                            
+                            <ol class="doc-list">
+                                <li>This RENTAL AGREEMENT is for a period of <span class="highlight" data-field="LEASE_PERIOD">eleven months</span> from the date of execution of this agreement i.e., on <span class="highlight" data-field="LEASE_END_DATE">25/02/2027</span>.</li>
+                                <li>The OWNER has agreed to let out the said premises for a monthly rent of Rs.<span class="highlight" data-field="RENT_AMOUNT">10,500.00</span> (Rupees <span class="highlight" data-field="RENT_AMOUNT_WORDS">Ten Thousand Five Hundred</span> only)</li>
+                                <li>The TENANT has agreed to pay the rental amount on <span class="highlight" data-field="RENT_PAYMENT_DAY">15th</span> of every month.</li>
+                                <li>The TENANT has agreed to pay <span class="highlight" data-field="ESCALATION_RATE">5%</span> increase in the rent every <span class="highlight" data-field="LEASE_PERIOD_NUM">11</span> months, over the previous monthly rent.</li>
+                                <li>The TENANT has paid Security deposited to the OWNER an amount of Rs <span class="highlight" data-field="DEPOSIT_AMOUNT">50,000</span>/- (Rupees <span class="highlight" data-field="DEPOSIT_AMOUNT_WORDS">Fifty Thousand</span> only) by way of <span class="highlight" data-field="DEPOSIT_MODE">cash</span> as an advance deposit amount. The OWNER has agreed to refund the said amount without interest to the TENANT while vacating the rented premises. The TENANT has agreed for the same. The OWNER hereby acknowledges the receipt of the said amount from the tenant.</li>
+                                <li>The TENANT should use the rented premises for his Business Purpose Only, and not for any illegal trade or business and unlawful purpose like to endanger the building.</li>
+                                <li>The TENANT should pay the Electricity and water charges utilized for his own use as per the actual meter reading for the rented premises during the period of tenancy.</li>
+                                <li>The tenancy period may be renewed for further period of <span class="highlight" data-field="LEASE_PERIOD_NUM">11</span> months by mutual agreement between the OWNER and TENANT on the terms and conditions to be specified at that time.</li>
+                                <li>The OWNER and TENANT have agreed that <span class="highlight" data-field="NOTICE_PERIOD">three months</span> prior notice on either side is required for the termination of the tenancy period.</li>
+                            </ol>
+                            
+                            <p class="doc-para">
+                                IN WITNESSES THEREOF THE OWNER and the TENANT have signed this rental agreement on the day, month and year mentioned above.
+                            </p>
+                            
+                            <div class="signature-section">
+                                <div class="sig-block">
+                                    <span class="sig-line">({{OWNER_SIG_NAMES}})</span>
+                                    <span class="sig-label">OWNER</span>
+                                </div>
+                                <div class="sig-block">
+                                    <span class="sig-line">({{TENANT_SIG_NAMES}})</span>
+                                    <span class="sig-label">TENANT</span>
+                                </div>
+                            </div>
+                            
+                            <div class="witnesses-section">
+                                <h3>Witnesses:</h3>
+                                <p>1.</p>
+                                <p>2.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF Preview Frame -->
+                    <div id="pdf-view" class="preview-content pdf-content">
+                        <!-- Loading container -->
+                        <div id="pdf-loading" class="pdf-loading-overlay hide">
+                            <i class="fa-solid fa-circle-notch fa-spin spinner-large"></i>
+                            <h3>Generating PDF Document...</h3>
+                            <p>Communicating with MS Word to format, sign, and build print layout.</p>
+                        </div>
+                        <iframe id="pdf-iframe" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="action-bar">
+                    <button type="button" id="generate-btn" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-cog fa-spin icon-spinner hide" id="btn-spinner"></i>
+                        <i class="fa-solid fa-file-circle-check btn-icon-main"></i> Generate PDF & Word Docs
+                    </button>
+                    
+                    <div class="actions-group">
+                        <button type="button" id="print-btn" class="btn btn-secondary" disabled>
+                            <i class="fa-solid fa-print"></i> Direct Print
+                        </button>
+                        <a id="download-docx-btn" class="btn btn-outline disabled" href="#" download disabled>
+                            <i class="fa-solid fa-file-word"></i> Download .docx
+                        </a>
+                        <a id="download-pdf-btn" class="btn btn-outline disabled" href="#" download disabled>
+                            <i class="fa-solid fa-file-pdf"></i> Download .pdf
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hide">
+        <i class="fa-solid fa-circle-info toast-icon"></i>
+        <span id="toast-message">Notification message here</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

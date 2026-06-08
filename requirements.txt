@@ -1,0 +1,18 @@
+# Backend / web framework
+fastapi==0.127.0
+uvicorn==0.40.0
+starlette==0.50.0
+anyio==4.11.0
+pydantic==2.12.5
+
+# Auth & database
+PyJWT==2.10.1
+SQLAlchemy==2.0.48
+
+# Document generation (DOCX) + Word COM automation for PDF (Windows + MS Word required)
+python-docx==1.2.0
+pywin32==311
+
+# Desktop window + packaging
+pywebview==6.2.1
+pyinstaller==6.20.0

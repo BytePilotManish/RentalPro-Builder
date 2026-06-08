@@ -1,0 +1,156 @@
+Line 42: const num = parseInt(clean, 10);
+Line 275: useEffect(() => {
+Line 343: const parsed = parseFloat(clean);
+Line 349: const parts = dateStr.toString().split("/");
+Line 351: const day = parseInt(parts[0], 10);
+Line 352: const month = parseInt(parts[1], 10) - 1;
+Line 353: const year = parseInt(parts[2], 10);
+Line 368: const year = yearMatch ? parseInt(yearMatch[1], 10) : 2026;
+Line 383: const parts = str.split("/");
+Line 385: const day = parseInt(parts[0], 10);
+Line 386: const month = parseInt(parts[1], 10) - 1;
+Line 387: const yearPart = parseInt(parts[2], 10);
+Line 427: parts.push(renderHighlight(fieldKey));
+Line 439: useEffect(() => {
+Line 451: setToast({ show: true, message, type });
+Line 452: setTimeout(() => {
+Line 453: setToast(prev => ({ ...prev, show: false }));
+Line 487: handleLogout();
+Line 498: showToast(err.message, "error");
+Line 509: showToast(err.message, "error");
+Line 523: showToast(err.message, "error");
+Line 531: e.preventDefault();
+Line 543: showToast(`Welcome back, ${data.user.full_name}!`, "success");
+Line 547: showToast(err.message, "error");
+Line 552: e.preventDefault();
+Line 564: showToast("Account registered successfully!", "success");
+Line 569: showToast(err.message, "error");
+Line 580: useEffect(() => {
+Line 598: setEditorTitle("{t("newRentalAgreement")}");
+Line 661: setTimeout(() => {
+Line 678: showToast("Agreement deleted successfully.", "success");
+Line 681: showToast(err.message, "error");
+Line 704: setTimeout(() => setChangedField(null), 600);
+Line 708: if (e) e.preventDefault();
+Line 712: showToast("Template configuration is not loaded. Please wait.", "error");
+Line 734: showToast("Please fill in all fields before generating.", "error");
+Line 738: setFilenameInput(editorTitle);
+Line 739: setFeeInput(formData.SERVICE_FEE || "");
+Line 745: showToast("Please enter a valid filename.", "error");
+Line 804: showToast("Rental Agreement generated and saved successfully!", "success");
+Line 806: showToast(`Error: ${err.message}`, "error");
+Line 817: iframeRef.current.contentWindow.print();
+Line 824: printWindow.onload = () => printWindow.print();
+Line 826: showToast("Pop-up blocked. Please enable popups or download PDF to print.", "error");
+Line 908: // Dynamic {t("operationsJournal")}
+Line 910: const sortedAgs = [...agreements].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+Line 995: <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{t("welcomeBack")}</h1>
+Line 996: <p className="text-sm text-slate-500 dark:text-slate-400">{t("welcomeSub")}</p>
+Line 1002: <Mail className="w-3.5 h-3.5 text-slate-400" /> {t("emailAddress")}
+Line 1016: <Lock className="w-3.5 h-3.5 text-slate-400" /> {t("password")}
+Line 1020: value={login{t("password")}}
+Line 1021: onChange={(e) => setLogin{t("password")}(e.target.value)}
+Line 1038: {t("dontHaveAccount")}{" "}
+Line 1043: {t("signUp")}
+Line 1065: <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{t("createAccount")}</h1>
+Line 1072: <UserIcon className="w-3.5 h-3.5 text-slate-400" /> {t("fullName")}
+Line 1086: <Mail className="w-3.5 h-3.5 text-slate-400" /> {t("emailAddress")}
+Line 1100: <Lock className="w-3.5 h-3.5 text-slate-400" /> {t("password")}
+Line 1104: value={reg{t("password")}}
+Line 1105: onChange={(e) => setReg{t("password")}(e.target.value)}
+Line 1116: {t("signUp")}
+Line 1122: {t("alreadyHaveAccount")}{" "}
+Line 1148: {t("brandName")}
+Line 1159: { id: "dashboard", label: t("dashboard"), icon: () => <SlidersHorizontal className="w-4 h-4" /> },
+Line 1160: { id: "templates", label: t("templates"), icon: () => <Folder className="w-4 h-4" /> },
+Line 1161: { id: "conditions", label: t("conditions"), icon: () => <CheckCircle2 className="w-4 h-4" /> },
+Line 1162: { id: "tenants", label: t("tenants"), icon: () => <Users className="w-4 h-4" /> },
+Line 1163: { id: "owners", label: t("owners"), icon: () => <UserIcon className="w-4 h-4" /> },
+Line 1164: { id: "assets", label: t("assets"), icon: () => <Building className="w-4 h-4" /> },
+Line 1165: { id: "analytics", label: t("analytics"), icon: () => <TrendingUp className="w-4 h-4" /> },
+Line 1166: { id: "settings", label: t("settings"), icon: () => <Settings className="w-4 h-4" /> },
+Line 1167: { id: "print", label: t("print"), icon: () => <Layers className="w-4 h-4" /> }
+Line 1181: {t(item.id)}
+Line 1195: {t("signOut")}
+Line 1216: placeholder={t("searchAgreements")}
+Line 1228: showToast(`Language switched to ${nextLang === "EN" ? "English" : "Kannada (ಕನ್ನಡ)"}`, "success");
+Line 1270: <p className="text-slate-400 mt-0.5">{t("welcomeBack")} Builder active console.</p>
+Line 1292: {userProfile?.full_name?.charAt(0).toUpperCase() || "A"}
+Line 1311: {t("dashboardHeader")}
+Line 1315: {t("dashboardSub")}
+Line 1324: {t("newRentalAgreement")}
+Line 1335: {t("agreements")}
+Line 1341: <span>{t("cloudSecured")}</span>
+Line 1349: {/* Metric 2: {t("activeTenants")} */}
+Line 1353: {t("activeTenants")}
+Line 1359: <span>{t("liveRelationships")}</span>
+Line 1371: {t("expiring30d")}
+Line 1377: <span>{t("requiresRenewal")}</span>
+Line 1385: {/* Metric 4: {t("monthlyRevenue")} */}
+Line 1412: {t("monthlyRentInflow")}
+Line 1415: {t("year2026")}
+Line 1444: {/* 2. {t("operationsJournal")} Card */}
+Line 1448: {t("operationsJournal")}
+Line 1466: {t("manageVerifications")}
+Line 1478: {t("portfolio")}
+Line 1484: { id: "all", label: t("all") },
+Line 1485: { id: "active", label: t("active") },
+Line 1486: { id: "expiring", label: t("expiring") },
+Line 1487: { id: "draft", label: t("draft") }
+Line 1500: {t(tab.id)}
+Line 1555: onClick={() => editAgreement(agreement)}
+Line 1562: onClick={() => deleteAgreement(agreement.id)}
+Line 1605: <h2 className="text-2xl font-extrabold text-slate-850 dark:text-white tracking-tight">{t("masterClauseHeader")}</h2>
+Line 1606: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("masterClauseSub")}</p>
+Line 1641: showToast("Global clause removed.", "success");
+Line 1654: <h3 className="text-sm font-bold text-slate-800 dark:text-white">{t("createNewMaster")}</h3>
+Line 1658: placeholder={t("masterClausePlaceholder")}
+Line 1667: showToast("Please type a clause to add.", "error");
+Line 1673: showToast("New global clause added successfully!", "success");
+Line 1678: {t("addGlobalClause")}
+Line 1689: <h2 className="text-2xl font-extrabold text-slate-850 dark:text-white tracking-tight">{t("legalTemplates")}</h2>
+Line 1690: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("templatesSub")}</p>
+Line 1699: <h3 className="font-extrabold text-slate-800 dark:text-white text-base">{t("commercialRentalAgreement")}</h3>
+Line 1701: {t("commercialRentalSub")}
+Line 1708: {t("customizeGenerate")}
+Line 1759: onClick={() => showToast("Launching background verification portal...", "info")}
+Line 1896: <span className="text-xs text-slate-450 font-semibold">{t("activeTenants")} Ratio</span>
+Line 1938: onClick={() => showToast("Settings saved successfully.", "success")}
+Line 2099: {t("customizeDetails")}
+Line 2102: {t("customizeSub")}
+Line 2155: {t("leaseConditions")}
+Line 2185: <span>{showConditionsSidebar ? "{t("hidePanel")}" : "Manage {t("leaseConditions")}"}</span>
+Line 2191: <span className="text-[10px] font-extrabold text-slate-405 uppercase tracking-wider block">{t("quickAddClause")}</span>
+Line 2204: showToast("Please enter clause text.", "error");
+Line 2213: showToast("Clause added to this agreement.", "success");
+Line 2230: {/* Middle panel: {t("leaseConditions")} Sidebar */}
+Line 2238: {t("leaseConditions")}
+Line 2240: <p className="text-[10px] text-slate-500 mt-0.5 dark:text-slate-400">{t("sidebarSub")}</p>
+Line 2258: placeholder={t("searchClauses")}
+Line 2334: <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">{t("createCustomClause")}</span>
+Line 2348: {t("addGlobally")}
+Line 2357: showToast("Please enter clause text.", "error");
+Line 2373: showToast("Clause added to agreement and global registry!", "success");
+Line 2375: showToast("Clause added to this agreement.", "success");
+Line 2382: {t("addPoint")}
+Line 2396: showToast("Conditions reset to defaults.", "info");
+Line 2401: {t("resetDefaults")}
+Line 2414: {t("docPreview")}
+Line 2417: {t("previewSub")}
+Line 2433: {t("draftText")}
+Line 2446: {t("pdfView")}
+Line 2462: THIS RENTAL AGREEMENT is made and executed on this {renderHighlight("AGREEMENT_DATE")}, at {renderHighlight("AGREEMENT_PLACE")} by and between:
+Line 2466: <strong>{renderHighlight("OWNER_NAME")}</strong>, {renderHighlight("OWNER_PARENT")}, Aged {renderHighlight("OWNER_AGE")}, {renderHighlight("OWNER_ADDRESS")}, hereinafter called as the "OWNER", ONE PART,
+Line 2472: <strong>{renderHighlight("TENANT_NAME")}</strong> {renderHighlight("TENANT_PARENT")}, Aged {renderHighlight("TENANT_AGE")}, {renderHighlight("TENANT_ADDRESS")}, hereinafter called as the TENANT, SECOND PART.
+Line 2476: The TENANT has approached and requested the OWNER to rent out the building for Commercial Purpose {renderHighlight("PREMISES_ADDRESS")}, Consists {renderHighlight("PREMISES_DESCRIPTION")}, the Tenant has approached the owner let out the schedule shop premises for his {renderHighlight("BUSINESS_NAME")} for Commercial Purpose, The OWNER has agreed for the same.
+Line 2549: {t("saveGenerate")}
+Line 2571: {t("downloadDocx")}
+Line 2582: {t("downloadPdf")}
+Line 2597: {t("nameYourDoc")}
+Line 2600: {t("nameDocSub")}
+Line 2606: {t("docTitleLabel")}
+Line 2612: onChange={(e) => setFilenameInput(e.target.value)}
+Line 2615: e.preventDefault();
+Line 2638: onChange={(e) => setFeeInput(e.target.value)}
+Line 2641: e.preventDefault();
+Line 2668: {t("generateSave")}
