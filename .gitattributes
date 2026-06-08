@@ -1,0 +1,9 @@
+# Normalize text line endings; keep Windows batch files as CRLF
+* text=auto
+*.bat text eol=crlf
+
+# Treat Office/binary assets as binary
+*.docx binary
+*.doc binary
+*.png binary
+*.ico binary
