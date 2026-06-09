@@ -1,43 +1,72 @@
 # Releasing updates (auto-update via GitHub Releases)
 
-The desktop app checks this repo's **latest GitHub Release** for updates. To ship
-an update to clients, publish a Release with two assets: `RentalPro.zip` and
-`latest.json`.
+## One-command publish (recommended)
 
-> The repository (or at least its Releases) must be **PUBLIC** — the app
-> downloads the release files without any login/token. A private repo would
-> require shipping a secret token to clients, which is insecure.
+```bat
+publish_release.bat
+```
 
-## First-time setup (once)
+This will:
+1. Ask for the new version (e.g. `1.0.1`) and release notes
+2. Build the app (`build_desktop.bat`)
+3. Create `RentalPro.zip` + `latest.json`
+4. Upload everything to **GitHub Releases**
 
-1. In `version.py`, confirm:
-   - `GITHUB_OWNER = "BytePilotManish"`
-   - `GITHUB_REPO  = "RentalPro-Builder"`
-2. Make the GitHub repo **Public**: repo → Settings → General → Danger Zone →
-   "Change visibility" → Public.
+Clients with the desktop app auto-update on next launch.
 
-## Every time you release an update
+### First-time setup (once)
 
-1. Make your code changes.
-2. Bump the version in `version.py`, e.g. `__version__ = "1.0.1"`.
-3. Build:
+1. **Repo must be Public** (Settings → Change visibility → Public) so clients
+   can download updates without a login.
+
+2. Confirm `version.py`:
+   ```python
+   GITHUB_OWNER = "BytePilotManish"
+   GITHUB_REPO  = "RentalPro-Builder"
    ```
-   build_desktop.bat
-   ```
-   This produces `dist\RentalPro.zip` and `dist\latest.json`.
-4. (Optional) Edit the `"notes"` field in `dist\latest.json` to describe what
-   changed — this text is shown to the client in the update prompt.
-5. On GitHub: **Releases → Draft a new release**.
-   - Tag: `v1.0.1` (match the version), Target: `main`.
-   - Title: `v1.0.1`.
-   - Attach BOTH files: `dist\RentalPro.zip` and `dist\latest.json`.
-   - Publish release.
-6. Done. Clients auto-update on their next launch (or via Settings →
-   Software Updates → Check for Updates).
+
+3. **GitHub token** (stays on your PC only):
+   - Open https://github.com/settings/tokens
+   - Generate token (classic) with **`repo`** scope
+   - Create `.env` in the project folder:
+     ```
+     GITHUB_TOKEN=ghp_your_token_here
+     ```
+   - Or run `setup_github.bat` for step-by-step help
+
+   > Never commit `.env` or share your token. The script never stores it in code.
+
+### Every update
+
+```bat
+publish_release.bat
+```
+
+Or with options:
+
+```bat
+python publish_release.py --bump patch --notes "Fixed clause spacing"
+python publish_release.py --version 1.0.2 --notes "New feature"
+```
+
+### What gets uploaded
+
+| File | Purpose |
+|------|---------|
+| `RentalPro.zip` | Auto-update download (existing clients) |
+| `latest.json` | Version check + release notes |
+| `RentalPro-Setup.exe` | Optional; for new installs from GitHub |
+
+### Manual fallback
+
+If you prefer doing it by hand: run `build_desktop.bat`, then on GitHub
+**Releases → New release** upload `dist\RentalPro.zip` and `dist\latest.json`.
+
+## New client install
+
+Send **`dist\RentalPro-Setup.exe`** — they do not need GitHub.
 
 ## Notes
 
-- Client data (`database.db`, generated documents) lives in
-  `%LOCALAPPDATA%\RentalPro` and is **never** affected by updates.
-- The first delivery to a new client is still the full `dist\RentalPro` folder
-  (zip it and send). After that, updates are automatic.
+- Client data lives in `%LOCALAPPDATA%\RentalPro` and is never touched by updates.
+- Bump `__version__` in `version.py` before each release (or let `publish_release.bat` do it).

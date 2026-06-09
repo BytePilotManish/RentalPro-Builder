@@ -1,0 +1,327 @@
+Line 111: templates: "Legal Templates",
+Line 145: welcomeSub: "Log in to manage and generate legal document templates.",
+Line 175: masterClauseSub: "Manage global template clauses. Changes saved here will be available for all new agreements.",
+Line 186: templatesSub: "Select a verified legal template to customize and generate documents.",
+Line 187: commercialRentalAgreement: "Commercial Rental Agreement",
+Line 188: commercialRentalSub: "Standard commercial shop lease format containing standard clauses for rent, security deposit, escalation, and signatures.",
+Line 202: templates: "ಕಾನೂನು ಟೆಂಪ್ಲೇಟ್‌ಗಳು",
+Line 277: templatesSub: "ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಮತ್ತು ದಾಖಲೆಗಳನ್ನು ರಚಿಸಲು ಪರಿಶೀಲಿಸಿದ ಕಾನೂನು ಟೆಂಪ್ಲೇಟ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+Line 278: commercialRentalAgreement: "ವಾಣಿಜ್ಯ ಬಾಡಿಗೆ ಒಪ್ಪಂದ",
+Line 279: commercialRentalSub: "ಬಾಡಿಗೆ, ಭದ್ರತಾ ಠೇವಣಿ, ಹೆಚ್ಚಳ ಮತ್ತು ಸಹಿಗಳಿಗಾಗಿ ಪ್ರಮಾಣಿತ ಷರತ್ತುಗಳನ್ನು ಒಳಗೊಂಡಿರುವ ಪ್ರಮಾಣಿತ ವಾಣಿಜ್ಯ ಅಂಗಡಿ ಬಾಡಿಗೆ ಸ್ವರೂಪ.",
+Line 361: const [selectedTemplateId, setSelectedTemplateId] = useState(() => {
+Line 362: const saved = localStorage.getItem("selectedTemplateId");
+Line 378: const [kannadaKeyboardActive, setKannadaKeyboardActive] = useState(true);
+Line 394: localStorage.setItem("selectedTemplateId", JSON.stringify(selectedTemplateId));
+Line 395: }, [selectedTemplateId]);
+Line 433: const [activeSidebarTab, setActiveSidebarTab] = useState(() => localStorage.getItem("activeSidebarTab") || "dashboard"); // "dashboard", "templates", "tenants", "owners", "assets", "analytics", "settings", "print"
+Line 487: // Custom Templates states
+Line 488: const [customTemplates, setCustomTemplates] = useState([]);
+Line 546: const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
+Line 547: const [templateTitle, setTemplateTitle] = useState("");
+Line 548: const [templateDescription, setTemplateDescription] = useState("");
+Line 549: const [templateTextContent, setTemplateTextContent] = useState("");
+Line 552: const [isParsingTemplate, setIsParsingTemplate] = useState(false);
+Line 553: const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+Line 554: const [templateUploadFile, setTemplateUploadFile] = useState(null);
+Line 556: const fetchCustomTemplates = async () => {
+Line 559: const res = await fetch("/api/templates", {
+Line 564: setCustomTemplates(data);
+Line 567: console.error("Error fetching templates:", err);
+Line 571: const deleteCustomTemplate = async (id, title) => {
+Line 572: if (!window.confirm(`Are you sure you want to delete template "${title}"?`)) return;
+Line 574: const res = await fetch(`/api/templates/${id}`, {
+Line 579: showToast("Template deleted successfully.", "success");
+Line 580: fetchCustomTemplates();
+Line 583: showToast(err.detail || "Failed to delete template", "error");
+Line 590: const startNewCustomAgreement = (template) => {
+Line 591: setSelectedTemplateId(template.id);
+Line 593: setEditorTitle(`New ${template.title}`);
+Line 599: template.placeholders.forEach(p => {
+Line 613: "title": template.title,
+Line 621: template.placeholders.forEach(p => {
+Line 628: const handleParseTemplateText = (textValue) => {
+Line 642: const handleTemplateFileChange = async (e) => {
+Line 645: setTemplateUploadFile(file);
+Line 647: setIsParsingTemplate(true);
+Line 652: const res = await fetch("/api/templates/parse", {
+Line 659: setTemplateTextContent(data.text);
+Line 670: showToast(err.detail || "Failed to parse template file", "error");
+Line 675: setIsParsingTemplate(false);
+Line 679: const handleSaveTemplate = async (e) => {
+Line 681: if (!templateTitle) {
+Line 682: showToast("Template Title is required.", "error");
+Line 687: if (placeholdersToSave.length === 0 && templateTextContent) {
+Line 689: const matches = templateTextContent.match(regex) || [];
+Line 694: showToast("Please add/detect at least one editable placeholder (e.g. {{TENANT_NAME}} or [OWNER_NAME]) in your template content.", "warning");
+Line 698: setIsSavingTemplate(true);
+Line 700: formDataObj.append("title", templateTitle);
+Line 701: formDataObj.append("description", templateDescription);
+Line 702: formDataObj.append("content", templateTextContent);
+Line 704: if (templateUploadFile) {
+Line 705: formDataObj.append("file", templateUploadFile);
+Line 709: const res = await fetch("/api/templates", {
+Line 716: showToast("Template saved successfully!", "success");
+Line 717: setTemplateTitle("");
+Line 718: setTemplateDescription("");
+Line 719: setTemplateTextContent("");
+Line 722: setTemplateUploadFile(null);
+Line 723: setShowCreateTemplateModal(false);
+Line 724: fetchCustomTemplates();
+Line 728: showToast(err.detail || "Failed to save template", "error");
+Line 733: setIsSavingTemplate(false);
+Line 883: // English to Kannada Transliteration Keyboard helpers
+Line 958: const handleKannadaInput = (e, fieldKey) => {
+Line 959: if (!kannadaKeyboardActive) return;
+Line 1046: if (selectedTemplateId === -1) {
+Line 1050: label: "Agreement Month (Kannada)",
+Line 1056: label: "Agreement Year in Words (Kannada)",
+Line 1065: }, [fieldsConfig, selectedTemplateId]);
+Line 1095: if (!res.ok) throw new Error("Failed to fetch template fields");
+Line 1259: localStorage.removeItem("selectedTemplateId");
+Line 1287: fetchCustomTemplates();
+Line 1301: setSelectedTemplateId(null);
+Line 1328: const startNewKannadaAgreement = () => {
+Line 1329: setSelectedTemplateId(-1);
+Line 1332: setEditorTitle("Commercial Rental Agreement (Kannada)");
+Line 1392: const matchingTemplate = agreement.template_id
+Line 1393: ? customTemplates.find(t => t.id === agreement.template_id)
+Line 1396: if (matchingTemplate) {
+Line 1397: setSelectedTemplateId(agreement.template_id);
+Line 1401: matchingTemplate.placeholders.forEach(p => {
+Line 1415: "title": matchingTemplate.title,
+Line 1420: setSelectedTemplateId(null);
+Line 1504: showToast("Template configuration is not loaded. Please wait.", "error");
+Line 1559: template_id: selectedTemplateId,
+Line 1560: data: selectedTemplateId ? {
+Line 1635: <span className={`bg-indigo-50 border-b-2 border-dashed border-indigo-400/80 px-1 rounded text-indigo-700 font-semibold transition-all duration-350 dark:bg-indigo-950/40 dark:border-indigo-500/50 dark:text-indigo-300 ${isChanged ? 'animate-pulse bg-amber-200/40 dark:bg-amber-500/30' : ''}`}>
+Line 1714: desc: `${ag.data.OWNER_NAME || 'Owner'} drafted commercial shop lease for ${ag.data.TENANT_NAME || 'Tenant'}.`,
+Line 1764: <div className="relative min-h-screen bg-slate-50 text-slate-850 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-250">
+Line 1772: toast.show ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95 pointer-events-none"
+Line 1788: <div className="bg-white border border-slate-200/80 dark:bg-slate-900/60 dark:border-slate-800/80 backdrop-blur-xl p-8 rounded-3xl w-full max-w-md shadow-xl dark:shadow-2xl space-y-6 relative z-10 transition-all">
+Line 1793: <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{t("welcomeBack")}</h1>
+Line 1798: <div className="flex flex-col gap-1.5">
+Line 1799: <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+Line 1812: <div className="flex flex-col gap-1.5">
+Line 1813: <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+Line 1834: <div className="border-t border-slate-100 dark:border-slate-800 pt-4 text-center">
+Line 1847: <div className="mt-1"><span className="font-semibold text-emerald-700 dark:text-emerald-400">admin@rentalpro.com</span> (pw: <span className="font-medium text-slate-700 dark:text-slate-300">admin123</span>)</div>
+Line 1858: <div className="bg-white border border-slate-200 dark:bg-slate-900/60 dark:border-slate-800/80 backdrop-blur-xl p-8 rounded-3xl w-full max-w-md shadow-xl dark:shadow-2xl space-y-6 relative z-10 transition-all">
+Line 1863: <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{t("createAccount")}</h1>
+Line 1864: <p className="text-sm text-slate-500 dark:text-slate-400">Sign up to manage and store custom templates.</p>
+Line 1868: <div className="flex flex-col gap-1.5">
+Line 1869: <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+Line 1882: <div className="flex flex-col gap-1.5">
+Line 1883: <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+Line 1896: <div className="flex flex-col gap-1.5">
+Line 1897: <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+Line 1918: <div className="border-t border-slate-100 dark:border-slate-800 pt-4 text-center">
+Line 1934: <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-250">
+Line 1937: <aside className={`bg-slate-950 text-slate-400 flex flex-col justify-between border-r border-slate-900 z-10 flex-shrink-0 py-6 transition-all duration-300 h-screen sticky top-0 ${isSidebarCollapsed ? "w-[84px] px-3" : "w-[280px] px-4"}`}>
+Line 1953: className="text-slate-500 hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-900 transition-colors flex items-center justify-center"
+Line 1964: <nav className="space-y-1 flex-grow overflow-y-auto custom-scrollbar-minimal pr-1">
+Line 1967: { id: "templates", label: t("templates"), icon: () => <Folder className="w-4 h-4" /> },
+Line 2018: <div className="flex-grow bg-[#f8fafc] text-slate-850 dark:bg-slate-950 dark:text-slate-100 flex flex-col h-screen overflow-y-auto relative z-0">
+Line 2028: <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+Line 2034: className="bg-slate-50 border border-slate-200/60 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white text-slate-800 text-sm rounded-xl pl-10 pr-4 py-2 w-full outline-none transition-all dark:bg-slate-900/60 dark:border-slate-800 dark:focus:bg-slate-900/60 dark:text-slate-200"
+Line 2045: showToast(`Language switched to ${nextLang === "EN" ? "English" : "Kannada (ಕನ್ನಡ)"}`, "success");
+Line 2047: className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200/60 shadow-sm hover:border-slate-300 dark:bg-slate-900/40 dark:border-slate-800 text-xs font-bold text-slate-600 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white active:scale-95 transition-all cursor-pointer"
+Line 2064: <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+Line 2071: <div className="flex justify-between items-center border-b pb-2 border-slate-100 dark:border-slate-800">
+Line 2088: <div className="pr-2 flex-1">
+Line 2100: className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 p-0.5 rounded transition-all cursor-pointer"
+Line 2125: {/* User Card */}
+Line 2131: <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{userProfile?.full_name || "Admin Console"}</span>
+Line 2139: <main className="p-8 flex-grow space-y-8 z-10">
+Line 2150: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+Line 2165: <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+Line 2169: <div className="text-left space-y-1.5">
+Line 2176: <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+Line 2187: <div className="text-left space-y-1.5">
+Line 2205: <div className="text-left space-y-1.5">
+Line 2223: <div className="text-left space-y-1.5">
+Line 2242: <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+Line 2244: {/* 1. Monthly Rent Inflow Chart Card */}
+Line 2246: <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+Line 2256: <div className="flex-grow flex items-end justify-between px-4 py-6 h-48 relative z-10">
+Line 2262: <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-extrabold px-2 py-1 rounded absolute -top-1 shadow dark:bg-slate-800 z-30 pointer-events-none transform -translate-y-2">
+Line 2267: <div className="w-full bg-slate-100 rounded-xl h-40 dark:bg-slate-950 flex items-end overflow-hidden border border-slate-200/10">
+Line 2280: {/* 2. {t("operationsJournal")} Card */}
+Line 2282: <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+Line 2289: <div className="flex-grow overflow-y-auto py-4 space-y-4 pr-1 text-left">
+Line 2292: <span className={`w-2.5 h-2.5 rounded-full ${log.color} mt-1 flex-shrink-0`} />
+Line 2312: <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+Line 2318: <div className="flex bg-slate-100 border border-slate-200/80 p-1 rounded-xl dark:bg-slate-950 dark:border-slate-800 self-end">
+Line 2330: className={`text-xs font-bold px-4 py-1.5 rounded-lg transition-all ${
+Line 2345: <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
+Line 2350: <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+Line 2351: <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-200/60 flex items-center justify-center text-slate-400 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-600">
+Line 2362: <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+Line 2370: <h3 className="font-bold text-slate-800 dark:text-slate-200 line-clamp-1 text-left">
+Line 2378: <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 text-left">
+Line 2382: <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-600 bg-slate-50 border border-slate-100 p-2.5 rounded-xl dark:text-slate-400 dark:bg-slate-950/30 dark:border-slate-800/50 text-left">
+Line 2388: <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3 flex-wrap gap-2">
+Line 2392: className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-emerald-355 hover:bg-emerald-50 bg-white transition-all cursor-pointer dark:text-slate-400 dark:hover:text-emerald-400 dark:border-slate-800 dark:hover:border-emerald-500/20 dark:bg-slate-950 dark:hover:bg-emerald-50/5"
+Line 2400: className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-rose-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50 bg-white disabled:opacity-50 transition-all cursor-pointer dark:text-slate-400 dark:hover:text-rose-400 dark:border-slate-800 dark:hover:border-rose-500/20 dark:bg-slate-950 dark:hover:bg-rose-50/5 disabled:cursor-not-allowed"
+Line 2415: className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200"
+Line 2423: className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200"
+Line 2442: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("masterClauseSub")}</p>
+Line 2461: className="w-full bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-300 outline-none resize-none border-b border-transparent focus:border-slate-200 dark:focus:border-slate-800 focus:bg-white dark:focus:bg-slate-950/40 p-1 rounded transition-all min-h-[60px]"
+Line 2463: <div className="flex gap-2 mt-1.5 text-[10px] text-slate-400 font-medium">
+Line 2480: className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all opacity-0 group-hover:opacity-100"
+Line 2489: <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-4">
+Line 2522: {activeSidebarTab === "templates" && (
+Line 2526: <h2 className="text-2xl font-extrabold text-slate-850 dark:text-white tracking-tight">{t("legalTemplates")}</h2>
+Line 2527: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("templatesSub")}</p>
+Line 2531: setTemplateTitle("");
+Line 2532: setTemplateDescription("");
+Line 2533: setTemplateTextContent("");
+Line 2536: setTemplateUploadFile(null);
+Line 2537: setShowCreateTemplateModal(true);
+Line 2542: Create Custom Template
+Line 2546: <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+Line 2552: <h3 className="font-extrabold text-slate-800 dark:text-white text-base">{t("commercialRentalAgreement")}</h3>
+Line 2554: {t("commercialRentalSub")}
+Line 2570: <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Commercial Rental Agreement (Kannada)</h3>
+Line 2572: Standard commercial shop lease format in Kannada using Nudi Akshar-02 legacy font representation. Includes integrated transliteration keyboard support.
+Line 2576: onClick={startNewKannadaAgreement}
+Line 2583: {customTemplates.map((tmpl) => (
+Line 2588: deleteCustomTemplate(tmpl.id, tmpl.title);
+Line 2590: className="absolute top-4 right-4 text-slate-350 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+Line 2591: title="Delete Template"
+Line 2607: {tmpl.description || "Custom user template with defined placeholders."}
+Line 2695: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Detailed rent inflow aggregations and performance metrics.</p>
+Line 2698: <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+Line 2700: <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider border-b pb-3 border-slate-100 dark:border-slate-800">Revenue Stream (Jan-Jun 2026)</h3>
+Line 2712: <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider border-b pb-3 border-slate-100 dark:border-slate-800">Performance Ratios</h3>
+Line 2726: <span className="text-xs font-extrabold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/45">100% Active</span>
+Line 2738: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure parameters, brand details, and print outputs.</p>
+Line 2745: <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+Line 2750: <select className="bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 text-xs font-bold rounded-lg px-2.5 py-1.5 outline-none text-slate-700 dark:text-slate-300">
+Line 2757: <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+Line 2762: <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">Times New Roman (12pt)</span>
+Line 2782: className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition-all dark:bg-slate-950 dark:hover:bg-slate-900 dark:text-slate-350 dark:border-slate-800 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+Line 2805: <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+Line 2810: <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">
+Line 2816: <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+Line 2823: <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+Line 2846: className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+Line 2871: <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Validate PDF dimensions and compare layout margins side-by-side.</p>
+Line 2883: <p className="text-slate-800 dark:text-white mt-1">1 inch (Standard Letter)</p>
+Line 2887: <p className="text-slate-800 dark:text-white mt-1">Subpixel antialiased TrueType</p>
+Line 2899: <div className={`mx-auto flex flex-col h-screen relative z-10 transition-all duration-300 ${
+Line 2905: <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 border border-slate-200/80 shadow-2xl backdrop-blur-xl dark:bg-slate-900/80 dark:border-slate-800 transition-all hover:scale-[1.02] duration-200">
+Line 2913: className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+Line 2916: : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+Line 2927: className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+Line 2930: : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+Line 2938: <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-805 mx-1" />
+Line 2943: className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-all"
+Line 2946: <LogOut className="w-3.5 h-3.5 rotate-180" />
+Line 2972: className="bg-transparent text-lg font-extrabold text-slate-850 border-b border-transparent focus:border-slate-300 outline-none max-w-sm px-1 dark:text-slate-100 dark:focus:border-slate-800"
+Line 2976: <span className="text-[10px] text-slate-405 font-bold px-1 dark:text-slate-500 uppercase tracking-wider">
+Line 3007: ? "grid-cols-1"
+Line 3009: ? "grid-cols-1 lg:grid-cols-[400px_360px_1fr]"
+Line 3010: : "grid-cols-1 lg:grid-cols-[450px_1fr]"
+Line 3016: <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+Line 3021: <p className="text-[11px] text-slate-500 mt-1 dark:text-slate-400">
+Line 3027: {selectedTemplateId === -1 && (
+Line 3037: checked={kannadaKeyboardActive}
+Line 3038: onChange={(e) => setKannadaKeyboardActive(e.target.checked)}
+Line 3044: {kannadaKeyboardActive && (
+Line 3045: <div className="bg-white border border-slate-150 rounded-xl p-3 text-[10px] text-slate-500 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400 space-y-1.5 leading-relaxed">
+Line 3046: <div className="font-extrabold text-slate-650 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800/60 pb-1 mb-1 uppercase tracking-wider">Type phonetic keys (Legend):</div>
+Line 3047: <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+Line 3060: <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
+Line 3089: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3116: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3141: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3150: {/* Dynamic dropdowns for CUSTOM_FIELDS in custom templates */}
+Line 3175: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3206: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3235: className="bg-white border border-slate-250 text-slate-800 text-[10px] font-bold rounded-lg px-2 py-1 outline-none dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200 cursor-pointer"
+Line 3250: <div key={fieldKey} className="flex flex-col gap-1.5">
+Line 3259: onKeyDown={(e) => selectedTemplateId === -1 && handleKannadaInput(e, fieldKey)}
+Line 3270: onKeyDown={(e) => selectedTemplateId === -1 && handleKannadaInput(e, fieldKey)}
+Line 3280: {/* Terms & Conditions Checklist Summary Card under Financials */}
+Line 3284: <h4 className="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+Line 3294: <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+Line 3327: className="flex-grow bg-white border border-slate-200 focus:border-[#0f9770] text-xs rounded-xl px-2.5 py-1.5 outline-none transition-all resize-none h-11 dark:bg-slate-950/60 dark:border-slate-800 dark:text-slate-200"
+Line 3365: <div className="p-5 border-b border-slate-105 dark:border-slate-800 flex justify-between items-center flex-shrink-0">
+Line 3367: <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 uppercase tracking-wider">
+Line 3376: className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-205 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+Line 3384: <div className="p-3 border-b border-slate-105 dark:border-slate-800 flex-shrink-0">
+Line 3415: className="mt-1 accent-emerald-600 rounded cursor-pointer flex-shrink-0"
+Line 3426: className="w-full bg-transparent text-xs text-slate-700 dark:text-slate-305 outline-none resize-none border-b border-transparent focus:border-slate-200 dark:focus:border-slate-805 focus:bg-white dark:focus:bg-slate-900/60 p-1 rounded min-h-[50px] leading-relaxed"
+Line 3430: <div className="flex flex-wrap gap-1 mt-1 text-[8px] font-semibold text-slate-400">
+Line 3433: <span key={pi} className="text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded">
+Line 3447: className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+Line 3464: <div className="p-4 border-t border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/20 flex-shrink-0 space-y-3">
+Line 3469: className="w-full bg-white border border-slate-200 focus:border-[#0f9770] text-xs rounded-xl px-3 py-2 outline-none transition-all resize-none h-14 dark:bg-slate-950/60 dark:border-slate-850 dark:text-slate-200"
+Line 3472: <label className="flex items-center gap-1.5 text-[9px] font-extrabold text-slate-500 cursor-pointer">
+Line 3511: className="bg-[#0f9770] hover:bg-[#0d8563] text-white font-bold px-3 py-1.5 rounded-lg text-[10px] transition-all cursor-pointer shadow-md shadow-emerald-500/10 active:scale-95"
+Line 3530: className="w-full text-center text-[9px] font-bold text-slate-405 hover:text-emerald-650 transition-colors uppercase pt-1"
+Line 3541: <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex-shrink-0 flex justify-between items-center flex-wrap gap-4">
+Line 3547: <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+Line 3553: <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl dark:bg-slate-950 dark:border-slate-800">
+Line 3583: <div className="flex-grow overflow-y-auto p-6 bg-slate-100/60 dark:bg-slate-950/40 flex justify-center items-start relative min-h-0 border-b border-slate-200 dark:border-slate-800">
+Line 3587: <div className="bg-white text-slate-900 px-12 py-14 shadow-xl border border-slate-200 rounded-xl rental-agreement-document text-justify text-[12pt] leading-[1.6]">
+Line 3588: {selectedTemplateId === -1 ? (
+Line 3646: <div className="mt-10 grid grid-cols-2 gap-8 text-center pt-8 border-t border-slate-100">
+Line 3649: <p className="text-xs text-slate-500 mt-1">(ಬಾಡಿಗೆದಾರರ ಸಹಿ)</p>
+Line 3653: <p className="text-xs text-slate-500 mt-1">(ಮಾಲೀಕರ ಸಹಿ)</p>
+Line 3658: ) : selectedTemplateId !== null && selectedTemplateId !== -1 ? (
+Line 3665: const currentTemplate = customTemplates.find(t => t.id === selectedTemplateId);
+Line 3666: if (!currentTemplate || !currentTemplate.content) return null;
+Line 3669: const parts = currentTemplate.content.split(regex);
+Line 3682: className={`font-semibold px-1 py-0.5 rounded transition-all ${
+Line 3685: : "bg-amber-100 text-amber-850 dark:bg-amber-950/40 dark:text-amber-300 animate-pulse border-b-2 border-amber-400"
+Line 3724: The TENANT has approached and requested the OWNER to rent out the building for Commercial Purpose {renderHighlight("PREMISES_ADDRESS")}, Consists {renderHighlight("PREMISES_DESCRIPTION")}, the Tenant has approached the owner let out the schedule shop premises for his {renderHighlight("BUSINESS_NAME")} for Commercial Purpose, The OWNER has agreed for the same.
+Line 3749: <div className="mt-14 flex justify-between">
+Line 3764: <div className="mt-12 flex flex-col gap-2">
+Line 3765: <h3 className="text-sm underline font-bold mb-1">Witnesses:</h3>
+Line 3778: <Loader2 className="w-12 h-12 text-emerald-600 dark:text-emerald-400 animate-spin" />
+Line 3789: className="w-full h-full min-h-[600px] bg-slate-100 rounded-2xl border border-slate-200 dark:bg-slate-850 dark:border-slate-800 shadow-inner"
+Line 3847: <div className="bg-white border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-5 transform transition-all scale-100 duration-200">
+Line 3858: <div className="flex flex-col gap-1.5 text-left">
+Line 3874: placeholder="e.g. Laggere Commercial Shop Lease"
+Line 3881: <div className="flex flex-col gap-1.5 text-left">
+Line 3882: <label htmlFor="modalServiceFee" className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+Line 3885: <span className="text-[9px] font-bold text-purple-600 bg-purple-500/10 px-1.5 py-0.5 rounded-md uppercase tracking-wide">Admin only</span>
+Line 3929: {/* Create Template Modal */}
+Line 3930: {showCreateTemplateModal && (
+Line 3932: <div className="bg-white border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 shadow-2xl space-y-5 transform transition-all scale-100 duration-200 text-left my-8">
+Line 3933: <div className="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-slate-800">
+Line 3936: Create Custom Template
+Line 3940: onClick={() => setShowCreateTemplateModal(false)}
+Line 3947: <form onSubmit={handleSaveTemplate} className="space-y-4">
+Line 3948: <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+Line 3949: <div className="flex flex-col gap-1.5">
+Line 3951: Template Title *
+Line 3955: value={templateTitle}
+Line 3956: onChange={(e) => setTemplateTitle(e.target.value)}
+Line 3962: <div className="flex flex-col gap-1.5">
+Line 3968: value={templateDescription}
+Line 3969: onChange={(e) => setTemplateDescription(e.target.value)}
+Line 3971: placeholder="Brief description of the template..."
+Line 3977: <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-350 uppercase tracking-wider flex items-center gap-1.5">
+Line 3981: <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+Line 3982: <div className="flex flex-col gap-1.5">
+Line 3989: onChange={handleTemplateFileChange}
+Line 3990: className="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 dark:file:bg-emerald-950/40 dark:file:text-emerald-400 file:cursor-pointer cursor-pointer border border-dashed border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-white dark:bg-slate-900/40"
+Line 3992: <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+Line 3997: <div className="flex flex-col gap-1.5">
+Line 3999: Pasted Template Text (or Preview)
+Line 4003: value={templateTextContent}
+Line 4004: onChange={(e) => setTemplateTextContent(e.target.value)}
+Line 4008: <div className="flex justify-between items-center mt-1">
+Line 4014: onClick={() => handleParseTemplateText(templateTextContent)}
+Line 4024: {isParsingTemplate && (
+Line 4025: <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 py-1 justify-center animate-pulse">
+Line 4040: <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3 border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-950/10">
+Line 4042: <label key={p} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-855 p-1.5 rounded-lg transition-colors">
+Line 4061: <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+Line 4064: onClick={() => setShowCreateTemplateModal(false)}
+Line 4071: disabled={isSavingTemplate || isParsingTemplate}
+Line 4072: className="flex items-center gap-1.5 bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-extrabold"
+Line 4074: {isSavingTemplate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+Line 4075: Save Template

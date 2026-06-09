@@ -13,12 +13,21 @@ popd
 echo [2/3] Packaging desktop app with PyInstaller...
 python -m PyInstaller RentalPro.spec --noconfirm --clean
 
-echo [3/3] Creating release zip + update manifest...
+echo [3/4] Creating release zip + update manifest...
 python make_release.py
+
+echo [4/4] Building Windows installer (Setup.exe)...
+set ISCC=%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe
+if exist "%ISCC%" (
+  "%ISCC%" installer.iss
+) else (
+  echo WARNING: Inno Setup not found. Install from https://jrsoftware.org/isdl.php
+  echo          or skip this step and zip dist\RentalPro manually.
+)
 
 echo.
 echo Done.
-echo   First-time delivery : send the ENTIRE "dist\RentalPro" folder to the client.
-echo   Auto-update release : upload dist\RentalPro.zip AND dist\latest.json
-echo                         as assets on a GitHub Release (see version.py).
-pause
+echo   Client install      : send dist\RentalPro-Setup.exe  (recommended)
+echo   Manual folder       : send the ENTIRE dist\RentalPro folder (zip it)
+echo   Auto-update release : run publish_release.bat  (builds + uploads to GitHub)
+if not defined NOPAUSE pause

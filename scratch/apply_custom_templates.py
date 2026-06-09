@@ -1,0 +1,1208 @@
+import os
+
+file_path = "frontend/src/App.jsx"
+if not os.path.exists(file_path):
+    print("Error: App.jsx not found")
+    exit(1)
+
+with open(file_path, "r", encoding="utf-8") as f:
+    content = f.read()
+
+# Normalize line endings to LF for replacement processing
+has_crlf = "\r\n" in content
+content = content.replace("\r\n", "\n")
+
+# 1. UI_TRANSLATIONS.EN edit
+target1 = '''    commercialRentalSub: "Standard commercial shop lease format containing standard clauses for rent, security deposit, escalation, and signatures.",
+    customizeGenerate: "Customize & Generate"'''
+
+replacement1 = '''    commercialRentalSub: "Standard commercial shop lease format containing standard clauses for rent, security deposit, escalation, and signatures.",
+    customizeGenerate: "Customize & Generate",
+    notifications: "Notifications",
+    close: "Close",
+    systemReadyDesc: "Welcome to RentalPro Builder active console.",
+    noNotifications: "No new notifications",
+    agreementSavedTitle: "Agreement Saved",
+    agreementSavedDesc: "Agreement \\"{{title}}\\" has been compiled and saved successfully.",
+    agreementDeletedTitle: "Agreement Deleted",
+    agreementDeletedDesc: "An agreement has been removed from the database."'''
+
+if target1 in content:
+    content = content.replace(target1, replacement1)
+    print("UI_TRANSLATIONS.EN applied successfully")
+else:
+    print("Warning: target1 not found")
+
+# 2. UI_TRANSLATIONS.KN edit
+target2 = '''    commercialRentalSub: "ಬಾಡಿಗೆ, ಭದ್ರತಾ ಠೇವಣಿ, ಹೆಚ್ಚಳ ಮತ್ತು ಸಹಿಗಳಿಗಾಗಿ ಪ್ರಮಾಣಿತ ಷರತ್ತುಗಳನ್ನು ಒಳಗೊಂಡಿರುವ ಪ್ರಮಾಣಿತ ವಾಣಿಜ್ಯ ಅಂಗಡಿ ಬಾಡಿಗೆ ಸ್ವರೂಪ.",
+    customizeGenerate: "ಕಸ್ಟಮೈಸ್ & ಜನರೇಟ್"'''
+
+replacement2 = '''    commercialRentalSub: "ಬಾಡಿಗೆ, ಭದ್ರತಾ ಠೇವಣಿ, ಹೆಚ್ಚಳ ಮತ್ತು ಸಹಿಗಳಿಗಾಗಿ ಪ್ರಮಾಣಿತ ಷರತ್ತುಗಳನ್ನು ಒಳಗೊಂಡಿರುವ ಪ್ರಮಾಣಿತ ವಾಣಿಜ್ಯ ಅಂಗಡಿ ಬಾಡಿಗೆ ಸ್ವರೂಪ.",
+    customizeGenerate: "ಕಸ್ಟಮೈಸ್ & ಜನರೇಟ್",
+    notifications: "ಅಧಿಸೂಚನೆಗಳು",
+    close: "ಮುಚ್ಚಿ",
+    systemReadyDesc: "ರೆಂಟಲ್ ಪ್ರೊ ಬಿಲ್ಡರ್ ಸಕ್ರಿಯ ಕನ್ಸೋಲ್‌ಗೆ ಸುಸ್ವಾಗತ.",
+    noNotifications: "ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ",
+    agreementSavedTitle: "ಒಪ್ಪಂದವನ್ನು ಉಳಿಸಲಾಗಿದೆ",
+    agreementSavedDesc: "ಒಪ್ಪಂದ \\"{{title}}\\" ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಉಳಿಸಲಾಗಿದೆ.",
+    agreementDeletedTitle: "ಒಪ್ಪಂದವನ್ನು ಅಳಿಸಲಾಗಿದೆ",
+    agreementDeletedDesc: "ಡೇಟಾಬೇಸ್‌ನಿಂದ ಒಪ್ಪಂದವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ."'''
+
+if target2 in content:
+    content = content.replace(target2, replacement2)
+    print("UI_TRANSLATIONS.KN applied successfully")
+else:
+    print("Warning: target2 not found")
+
+# 3. State definitions
+target3 = '''  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(true);
+
+  // Software update state'''
+
+replacement3 = '''  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(true);
+  const [notificationsList, setNotificationsList] = useState([]);
+
+  const fetchNotifications = async () => {
+    if (!authToken) return;
+    try {
+      const res = await fetch("/api/notifications", {
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotificationsList(data);
+      }
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  const dismissNotification = async (id) => {
+    try {
+      const res = await fetch(`/api/notifications/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        setNotificationsList(prev => prev.filter(n => n.id !== id));
+      }
+    } catch (err) {
+      showToast("Failed to dismiss notification", "error");
+    }
+  };
+
+  const getNotificationText = (notif, type) => {
+    const key = type === "title" ? notif.title_key : notif.desc_key;
+    if (key) {
+      let translation = t(key);
+      if (notif.params) {
+        Object.keys(notif.params).forEach(pKey => {
+          translation = translation.replace(`{{${pKey}}}`, notif.params[pKey]);
+        });
+      }
+      return translation;
+    }
+    return type === "title" ? notif.title : notif.desc;
+  };
+
+  // Custom Templates states
+  const [customTemplates, setCustomTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
+  const [templateTitle, setTemplateTitle] = useState("");
+  const [templateDescription, setTemplateDescription] = useState("");
+  const [templateTextContent, setTemplateTextContent] = useState("");
+  const [detectedPlaceholders, setDetectedPlaceholders] = useState([]);
+  const [selectedPlaceholders, setSelectedPlaceholders] = useState({});
+  const [isParsingTemplate, setIsParsingTemplate] = useState(false);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [templateUploadFile, setTemplateUploadFile] = useState(null);
+
+  const fetchCustomTemplates = async () => {
+    if (!authToken) return;
+    try {
+      const res = await fetch("/api/templates", {
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCustomTemplates(data);
+      }
+    } catch (err) {
+      console.error("Error fetching templates:", err);
+    }
+  };
+
+  const deleteCustomTemplate = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to delete template "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/templates/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        showToast("Template deleted successfully.", "success");
+        fetchCustomTemplates();
+      } else {
+        const err = await res.json();
+        showToast(err.detail || "Failed to delete template", "error");
+      }
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  };
+
+  const startNewCustomAgreement = (template) => {
+    setSelectedTemplateId(template.id);
+    setEditorId(null);
+    setEditorTitle(`New ${template.title}`);
+    setActivePreviewTab("draft");
+    setPdfGenerated(false);
+    setAgreementConditions([]);
+    
+    const fields = {};
+    template.placeholders.forEach(p => {
+      const label = p.split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
+      fields[p] = {
+        label: label,
+        type: "text",
+        default: "",
+        placeholder: `Enter ${label.toLowerCase()}...`
+      };
+    });
+
+    const customFieldsConfig = {
+      "CUSTOM_FIELDS": {
+        "title": template.title,
+        "fields": fields
+      }
+    };
+    
+    setFieldsConfig(customFieldsConfig);
+    
+    const initialData = {};
+    template.placeholders.forEach(p => {
+      initialData[p] = "";
+    });
+    setFormData(initialData);
+    setCurrentView("editor");
+  };
+
+  const handleParseTemplateText = (textValue) => {
+    if (!textValue) return;
+    const regex = /(\{\{[A-Za-z0-9_]+\}\}|\[[A-Za-z0-9_]+\])/g;
+    const matches = textValue.match(regex) || [];
+    const uniqueKeys = Array.from(new Set(matches.map(m => m.replace(/[\{\}\[\]]/g, ""))));
+    setDetectedPlaceholders(uniqueKeys);
+    
+    const initialSelect = {};
+    uniqueKeys.forEach(k => {
+      initialSelect[k] = true;
+    });
+    setSelectedPlaceholders(initialSelect);
+  };
+
+  const handleTemplateFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setTemplateUploadFile(file);
+    
+    setIsParsingTemplate(true);
+    const formDataObj = new FormData();
+    formDataObj.append("file", file);
+    
+    try {
+      const res = await fetch("/api/templates/parse", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${authToken}` },
+        body: formDataObj
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTemplateTextContent(data.text);
+        setDetectedPlaceholders(data.placeholders);
+        
+        const initialSelect = {};
+        data.placeholders.forEach(k => {
+          initialSelect[k] = true;
+        });
+        setSelectedPlaceholders(initialSelect);
+        showToast("Document parsed successfully. Placeholders extracted!", "success");
+      } else {
+        const err = await res.json();
+        showToast(err.detail || "Failed to parse template file", "error");
+      }
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setIsParsingTemplate(false);
+    }
+  };
+
+  const handleSaveTemplate = async (e) => {
+    e.preventDefault();
+    if (!templateTitle) {
+      showToast("Template Title is required.", "error");
+      return;
+    }
+    
+    const placeholdersToSave = Object.keys(selectedPlaceholders).filter(k => selectedPlaceholders[k]);
+    if (placeholdersToSave.length === 0) {
+      showToast("Please select at least one editable placeholder.", "warning");
+      return;
+    }
+    
+    setIsSavingTemplate(true);
+    const formDataObj = new FormData();
+    formDataObj.append("title", templateTitle);
+    formDataObj.append("description", templateDescription);
+    formDataObj.append("content", templateTextContent);
+    formDataObj.append("placeholders", JSON.stringify(placeholdersToSave));
+    if (templateUploadFile) {
+      formDataObj.append("file", templateUploadFile);
+    }
+    
+    try {
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${authToken}` },
+        body: formDataObj
+      });
+      
+      if (res.ok) {
+        showToast("Template saved successfully!", "success");
+        setTemplateTitle("");
+        setTemplateDescription("");
+        setTemplateTextContent("");
+        setDetectedPlaceholders([]);
+        setSelectedPlaceholders({});
+        setTemplateUploadFile(null);
+        setShowCreateTemplateModal(false);
+        fetchCustomTemplates();
+        fetchNotifications();
+      } else {
+        const err = await res.json();
+        showToast(err.detail || "Failed to save template", "error");
+      }
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
+  // Software update state'''
+
+if target3 in content:
+    content = content.replace(target3, replacement3)
+    print("State variables and helpers applied successfully")
+else:
+    print("Warning: target3 not found")
+
+# 4. useEffect hooks
+target4 = '''  // Load profile and config whenever the auth token changes
+  useEffect(() => {
+    if (authToken) {
+      localStorage.setItem("token", authToken);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProfile();
+      fetchFieldsConfig();
+      fetchAgreements();
+      setCurrentView("dashboard");
+    } else {'''
+
+replacement4 = '''  // Load profile and config whenever the auth token changes
+  useEffect(() => {
+    if (authToken) {
+      localStorage.setItem("token", authToken);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProfile();
+      fetchFieldsConfig();
+      fetchAgreements();
+      fetchNotifications();
+      fetchCustomTemplates();
+      setCurrentView("dashboard");
+    } else {'''
+
+if target4 in content:
+    content = content.replace(target4, replacement4)
+    print("useEffect hooks applied successfully")
+else:
+    print("Warning: target4 not found")
+
+# 5. startNewAgreement hook
+target5 = '''  const startNewAgreement = () => {
+    setEditorId(null);
+    setEditorTitle(t("newRentalAgreement"));'''
+
+replacement5 = '''  const startNewAgreement = () => {
+    setSelectedTemplateId(null);
+    fetchFieldsConfig();
+    setEditorId(null);
+    setEditorTitle(t("newRentalAgreement"));'''
+
+if target5 in content:
+    content = content.replace(target5, replacement5)
+    print("startNewAgreement applied successfully")
+else:
+    print("Warning: target5 not found")
+
+# 6. editAgreement logic
+target6 = '''    setDownloadUrls({
+      docx: `${agreement.docx_url}?token=${authToken}`,
+      pdf: `${agreement.pdf_url}?token=${authToken}`
+    });
+    
+    // Populate agreementConditions
+    const savedClauses = agreement.data?.AGREEMENT_CONDITIONS || [];
+    const localConditions = [];
+    
+    // First add saved ones
+    savedClauses.forEach((clauseText, idx) => {
+      localConditions.push({
+        id: `saved-${idx}-${Date.now()}`,
+        text: clauseText,
+        checked: true
+      });
+    });
+    
+    // Then add any master ones that are not already in saved ones
+    masterConditions.forEach((masterText, idx) => {
+      const isAlreadySaved = savedClauses.some(savedText => savedText === masterText);
+      if (!isAlreadySaved) {
+        localConditions.push({
+          id: `master-${idx}-${Date.now()}`,
+          text: masterText,
+          checked: false
+        });
+      }
+    });
+    setAgreementConditions(localConditions);
+
+    setActivePreviewTab("draft");
+    setCurrentView("editor");'''
+
+replacement6 = '''    setDownloadUrls({
+      docx: `${agreement.docx_url}?token=${authToken}`,
+      pdf: `${agreement.pdf_url}?token=${authToken}`
+    });
+    
+    const matchingTemplate = agreement.template_id 
+      ? customTemplates.find(t => t.id === agreement.template_id)
+      : null;
+      
+    if (matchingTemplate) {
+      setSelectedTemplateId(agreement.template_id);
+      setAgreementConditions([]);
+      
+      const fields = {};
+      matchingTemplate.placeholders.forEach(p => {
+        const label = p.split("_")
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(" ");
+        fields[p] = {
+          label: label,
+          type: "text",
+          default: "",
+          placeholder: `Enter ${label.toLowerCase()}...`
+        };
+      });
+
+      setFieldsConfig({
+        "CUSTOM_FIELDS": {
+          "title": matchingTemplate.title,
+          "fields": fields
+        }
+      });
+    } else {
+      setSelectedTemplateId(null);
+      fetchFieldsConfig();
+      
+      // Populate agreementConditions
+      const savedClauses = agreement.data?.AGREEMENT_CONDITIONS || [];
+      const localConditions = [];
+      
+      savedClauses.forEach((clauseText, idx) => {
+        localConditions.push({
+          id: `saved-${idx}-${Date.now()}`,
+          text: clauseText,
+          checked: true
+        });
+      });
+      
+      masterConditions.forEach((masterText, idx) => {
+        const isAlreadySaved = savedClauses.some(savedText => savedText === masterText);
+        if (!isAlreadySaved) {
+          localConditions.push({
+            id: `master-${idx}-${Date.now()}`,
+            text: masterText,
+            checked: false
+          });
+        }
+      });
+      setAgreementConditions(localConditions);
+    }
+
+    setActivePreviewTab("draft");
+    setCurrentView("editor");'''
+
+if target6 in content:
+    content = content.replace(target6, replacement6)
+    print("editAgreement logic applied successfully")
+else:
+    print("Warning: target6 not found")
+
+# 7. deleteAgreement update
+target7 = '''        showToast("Agreement deleted successfully.", "success");
+        setAgreements(prev => prev.filter(ag => ag.id !== id));
+      } catch (err) {'''
+
+replacement7 = '''        showToast("Agreement deleted successfully.", "success");
+        setAgreements(prev => prev.filter(ag => ag.id !== id));
+        fetchNotifications();
+        setHasNewNotifications(true);
+      } catch (err) {'''
+
+if target7 in content:
+    content = content.replace(target7, replacement7)
+    print("deleteAgreement applied successfully")
+else:
+    print("Warning: target7 not found")
+
+# 8. executeSaveAndGenerate logic
+target8 = '''  const executeSaveAndGenerate = async (titleToSave, feeToSave = "") => {
+    setIsGenerating(true);
+    setActivePreviewTab("pdf");
+
+    try {
+      const payload = {
+        id: editorId,
+        title: titleToSave,
+        data: {
+          ...formData,
+          SERVICE_FEE: feeToSave,
+          AGREEMENT_CONDITIONS: agreementConditions
+            .filter(c => c.checked)
+            .map(c => c.text)
+        }
+      };
+
+      const res = await fetch("/api/agreements", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Failed to generate document.");
+      }
+
+      const data = await res.json();
+      
+      const timestamp = new Date().getTime();
+      if (iframeRef.current) {
+        iframeRef.current.src = `${data.pdfUrl}?token=${authToken}&t=${timestamp}`;
+      }
+      
+      setDownloadUrls({ 
+        docx: `${data.docxUrl}?token=${authToken}`, 
+        pdf: `${data.pdfUrl}?token=${authToken}` 
+      });
+      setEditorId(data.id);
+      setPdfGenerated(true);
+      fetchAgreements(); 
+      showToast("Rental Agreement generated and saved successfully!", "success");
+    } catch (err) {
+      showToast(`Error: ${err.message}`, "error");
+      setActivePreviewTab("draft");
+    } finally {
+      setIsGenerating(false);
+    }
+  };'''
+
+replacement8 = '''  const executeSaveAndGenerate = async (titleToSave, feeToSave = "") => {
+    setIsGenerating(true);
+    setActivePreviewTab("pdf");
+
+    try {
+      const payload = {
+        id: editorId,
+        title: titleToSave,
+        template_id: selectedTemplateId,
+        data: selectedTemplateId ? {
+          ...formData,
+          SERVICE_FEE: feeToSave
+        } : {
+          ...formData,
+          SERVICE_FEE: feeToSave,
+          AGREEMENT_CONDITIONS: agreementConditions
+            .filter(c => c.checked)
+            .map(c => c.text)
+        }
+      };
+
+      const res = await fetch("/api/agreements", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Failed to generate document.");
+      }
+
+      const data = await res.json();
+      
+      const timestamp = new Date().getTime();
+      if (iframeRef.current) {
+        iframeRef.current.src = `${data.pdfUrl}?token=${authToken}&t=${timestamp}`;
+      }
+      
+      setDownloadUrls({ 
+        docx: `${data.docxUrl}?token=${authToken}`, 
+        pdf: `${data.pdfUrl}?token=${authToken}` 
+      });
+      setEditorId(data.id);
+      setPdfGenerated(true);
+      fetchAgreements(); 
+      showToast("Rental Agreement generated and saved successfully!", "success");
+      fetchNotifications();
+      setHasNewNotifications(true);
+    } catch (err) {
+      showToast(`Error: ${err.message}`, "error");
+      setActivePreviewTab("draft");
+    } finally {
+      setIsGenerating(false);
+    }
+  };'''
+
+if target8 in content:
+    content = content.replace(target8, replacement8)
+    print("executeSaveAndGenerate logic applied successfully")
+else:
+    print("Warning: target8 not found")
+
+# 9. Notification Bell Icon Badge
+target9_correct = '''                    <Bell className="w-4 h-4" />
+                    {hasNewNotifications && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                    )}
+                  </button>
+
+                  {/* Dropdown Panel */}
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200/85 rounded-2xl shadow-xl dark:bg-slate-900 dark:border-slate-800 py-3.5 px-4 text-left z-30 space-y-3">
+                      <div className="flex justify-between items-center border-b pb-2 border-slate-100 dark:border-slate-800">
+                        <span className="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Notifications</span>
+                        <button 
+                          onClick={() => setShowNotifications(false)}
+                          className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                        >
+                          Close
+                        </button>
+                      </div>
+                      <div className="space-y-2.5 max-h-48 overflow-y-auto">
+                        <div className="text-[11px] leading-relaxed border-b pb-2 border-slate-50 dark:border-slate-800/40 last:border-b-0">
+                          <span className="font-bold text-slate-700 dark:text-slate-200">Verification Approved</span>
+                          <p className="text-slate-400 mt-0.5">Aadhar credentials for tenant verified successfully.</p>
+                        </div>
+                        <div className="text-[11px] leading-relaxed border-b pb-2 border-slate-50 dark:border-slate-800/40 last:border-b-0">
+                          <span className="font-bold text-slate-700 dark:text-slate-200">System Ready</span>
+                          <p className="text-slate-400 mt-0.5">{t("welcomeBack")} Builder active console.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}'''
+
+replacement9 = '''                    <Bell className="w-4 h-4" />
+                    {hasNewNotifications && notificationsList.length > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                    )}
+                  </button>
+
+                  {/* Dropdown Panel */}
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200/85 rounded-2xl shadow-xl dark:bg-slate-900 dark:border-slate-800 py-3.5 px-4 text-left z-30 space-y-3">
+                      <div className="flex justify-between items-center border-b pb-2 border-slate-100 dark:border-slate-800">
+                        <span className="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">{t("notifications")}</span>
+                        <button 
+                          onClick={() => setShowNotifications(false)}
+                          className="text-[10px] font-bold text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-300"
+                        >
+                          {t("close")}
+                        </button>
+                      </div>
+                      <div className="space-y-2.5 max-h-48 overflow-y-auto">
+                        {notificationsList.length === 0 ? (
+                          <div className="text-center py-4">
+                            <p className="text-xs text-slate-450 dark:text-slate-500">{t("noNotifications")}</p>
+                          </div>
+                        ) : (
+                          notificationsList.map((notif) => (
+                            <div key={notif.id} className="group text-[11px] leading-relaxed border-b pb-2 border-slate-50 dark:border-slate-800/40 last:border-b-0 flex justify-between items-start">
+                              <div className="pr-2 flex-1">
+                                <span className="font-bold text-slate-700 dark:text-slate-200">
+                                  {getNotificationText(notif, "title")}
+                                </span>
+                                <p className="text-slate-400 mt-0.5">
+                                  {getNotificationText(notif, "desc")}
+                                </p>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  dismissNotification(notif.id);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 p-0.5 rounded transition-all cursor-pointer"
+                                title={t("close")}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}'''
+
+if target9_correct in content:
+    content = content.replace(target9_correct, replacement9)
+    print("Notification dropdown applied successfully")
+else:
+    print("Warning: target9 not found")
+
+# 10. Templates sidebar tab
+target10_actual = '''              {activeSidebarTab === "templates" && (
+                <div className="space-y-6 text-left">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-855 dark:text-white tracking-tight">{t("legalTemplates")}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("templatesSub")}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 flex flex-col justify-between h-[280px]">
+                      <div className="space-y-3">
+                        <div className="p-3 bg-emerald-500/10 rounded-2xl w-fit text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
+                          <Building className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-extrabold text-slate-800 dark:text-white text-base">{t("commercialRentalAgreement")}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {t("commercialRentalSub")}
+                        </p>
+                      </div>
+                      <button
+                        onClick={startNewAgreement}
+                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] text-xs cursor-pointer"
+                      >
+                        {t("customizeGenerate")}
+                      </button>
+                    </div>'''
+
+replacement10 = '''              {activeSidebarTab === "templates" && (
+                <div className="space-y-6 text-left">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h2 className="text-2xl font-extrabold text-slate-850 dark:text-white tracking-tight">{t("legalTemplates")}</h2>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("templatesSub")}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setTemplateTitle("");
+                        setTemplateDescription("");
+                        setTemplateTextContent("");
+                        setDetectedPlaceholders([]);
+                        setSelectedPlaceholders({});
+                        setTemplateUploadFile(null);
+                        setShowCreateTemplateModal(true);
+                      }}
+                      className="flex items-center gap-2 bg-[#0f9770] hover:bg-[#0d8563] text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] text-xs cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create Custom Template
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 flex flex-col justify-between h-[280px]">
+                      <div className="space-y-3">
+                        <div className="p-3 bg-emerald-500/10 rounded-2xl w-fit text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
+                          <Building className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-extrabold text-slate-800 dark:text-white text-base">{t("commercialRentalAgreement")}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
+                          {t("commercialRentalSub")}
+                        </p>
+                      </div>
+                      <button
+                        onClick={startNewAgreement}
+                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] text-xs cursor-pointer"
+                      >
+                        {t("customizeGenerate")}
+                      </button>
+                    </div>
+
+                    {customTemplates.map((tmpl) => (
+                      <div key={tmpl.id} className="relative bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 flex flex-col justify-between h-[280px] group">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCustomTemplate(tmpl.id, tmpl.title);
+                          }}
+                          className="absolute top-4 right-4 text-slate-350 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                          title="Delete Template"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="space-y-3">
+                          <div className="p-3 bg-emerald-500/10 rounded-2xl w-fit text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
+                            <Layers className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <h3 className="font-extrabold text-slate-800 dark:text-white text-base pr-6 truncate">{tmpl.title}</h3>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mt-0.5">
+                              {tmpl.placeholders.length} {tmpl.placeholders.length === 1 ? "Editable Field" : "Editable Fields"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
+                            {tmpl.description || "Custom user template with defined placeholders."}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => startNewCustomAgreement(tmpl)}
+                          className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] text-xs cursor-pointer"
+                        >
+                          {t("customizeGenerate")}
+                        </button>
+                      </div>
+                    ))}'''
+
+# Let's try matching with text-slate-850 as it is in the clean file
+target10_correct = '''              {activeSidebarTab === "templates" && (
+                <div className="space-y-6 text-left">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-850 dark:text-white tracking-tight">{t("legalTemplates")}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("templatesSub")}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 flex flex-col justify-between h-[280px]">
+                      <div className="space-y-3">
+                        <div className="p-3 bg-emerald-500/10 rounded-2xl w-fit text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
+                          <Building className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-extrabold text-slate-800 dark:text-white text-base">{t("commercialRentalAgreement")}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {t("commercialRentalSub")}
+                        </p>
+                      </div>
+                      <button
+                        onClick={startNewAgreement}
+                        className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] text-xs cursor-pointer"
+                      >
+                        {t("customizeGenerate")}
+                      </button>
+                    </div>'''
+
+if target10_correct in content:
+    content = content.replace(target10_correct, replacement10)
+    print("Templates sidebar tab applied successfully")
+else:
+    print("Warning: target10 not found")
+
+# 11. Create Template Modal & Document Name Modal Title Styling Fix
+target11_actual = '''            <div className="space-y-2 text-left">
+              <h3 className="text-base font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                <FileSignature className="w-5 h-5 text-[#0f9770]" />
+                {t("nameYourDoc")}
+              </h3>'''
+
+replacement11 = '''            <div className="space-y-2 text-left">
+              <h3 className="text-base font-extrabold text-slate-855 dark:text-white flex items-center gap-2">
+                <FileSignature className="w-5 h-5 text-[#0f9770]" />
+                {t("nameYourDoc")}
+              </h3>'''
+
+if target11_actual in content:
+    content = content.replace(target11_actual, replacement11)
+    print("Document title styling fix applied")
+else:
+    print("Warning: target11 not found")
+
+# Append Create Template Modal
+target_modal_insertion = '''      )}
+    </div>
+  );
+}'''
+
+pos = content.rfind(target_modal_insertion)
+if pos != -1:
+    modal_code = '''      {/* Create Template Modal */}
+      {showCreateTemplateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm dark:bg-slate-950/80 transition-all duration-300 overflow-y-auto">
+          <div className="bg-white border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 shadow-2xl space-y-5 transform transition-all scale-100 duration-200 text-left my-8">
+            <div className="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-extrabold text-slate-855 dark:text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                Create Custom Template
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setShowCreateTemplateModal(false)}
+                className="text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-300 text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTemplate} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                    Template Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={templateTitle}
+                    onChange={(e) => setTemplateTitle(e.target.value)}
+                    className="bg-slate-50 border border-slate-200/80 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 outline-none transition-all dark:bg-slate-950/60 dark:border-slate-800 dark:focus:bg-slate-950 dark:text-slate-200"
+                    placeholder="e.g. Residential Rent Agreement"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={templateDescription}
+                    onChange={(e) => setTemplateDescription(e.target.value)}
+                    className="bg-slate-50 border border-slate-200/80 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 outline-none transition-all dark:bg-slate-950/60 dark:border-slate-800 dark:focus:bg-slate-950 dark:text-slate-200"
+                    placeholder="Brief description of the template..."
+                  />
+                </div>
+              </div>
+
+              <div className="border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-4 bg-slate-55/40 dark:bg-slate-950/20 space-y-4">
+                <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-350 uppercase tracking-wider flex items-center gap-1.5">
+                  Upload Document or Paste Text
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      Upload Word (.docx) or PDF (.pdf) File
+                    </label>
+                    <input
+                      type="file"
+                      accept=".docx,.pdf"
+                      onChange={handleTemplateFileChange}
+                      className="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 dark:file:bg-emerald-950/40 dark:file:text-emerald-400 file:cursor-pointer cursor-pointer border border-dashed border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-white dark:bg-slate-900/40"
+                    />
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                      PDF and Word files are analyzed to extract placeholders automatically.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                      Pasted Template Text (or Preview)
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={templateTextContent}
+                      onChange={(e) => setTemplateTextContent(e.target.value)}
+                      className="bg-slate-50 border border-slate-200/80 focus:border-emerald-500 focus:bg-white text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950/60 dark:border-slate-800 dark:focus:bg-slate-950 dark:text-slate-200 font-mono"
+                      placeholder="Type/Paste text here. Placeholders should be formatted like {{PLACEHOLDER}} or [PLACEHOLDER]..."
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-[10px] text-slate-450 dark:text-slate-550">
+                        Type text or review file content extracted above.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleParseTemplateText(templateTextContent)}
+                        className="text-[10px] font-extrabold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 cursor-pointer"
+                      >
+                        Extract Placeholders
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {isParsingTemplate && (
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 py-1 justify-center animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                  Analyzing document & extracting placeholders...
+                </div>
+              )}
+
+              {detectedPlaceholders.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-655 dark:text-slate-400 uppercase tracking-wider block">
+                    Choose Editable Form Fields ({detectedPlaceholders.length} detected)
+                  </label>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                    Check the placeholders that you want the user to fill in from the dynamic form.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3 border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-950/10">
+                    {detectedPlaceholders.map(p => (
+                      <label key={p} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-855 p-1.5 rounded-lg transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedPlaceholders[p]}
+                          onChange={(e) => {
+                            setSelectedPlaceholders(prev => ({
+                              ...prev,
+                              [p]: e.target.checked
+                            }));
+                          }}
+                          className="w-3.5 h-3.5 accent-emerald-600 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span className="font-mono text-[10px] truncate" title={p}>{p}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateTemplateModal(false)}
+                  className="px-4 py-2 border border-slate-200/80 hover:border-slate-350 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-800 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingTemplate || isParsingTemplate}
+                  className="flex items-center gap-1.5 bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-extrabold"
+                >
+                  {isSavingTemplate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  Save Template
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+'''
+    content = content[:pos] + modal_code + content[pos:]
+    print("Modal markup appended successfully")
+else:
+    print("Warning: target_modal_insertion not found")
+
+# 12. Modify HTML Draft View to support previewing custom templates dynamically
+target_draft_view = '''                <div className={`w-full max-w-[800px] ${activePreviewTab === "draft" ? "block" : "hidden"}`}>
+                  <div className="bg-white text-slate-900 px-12 py-14 shadow-xl border border-slate-200 rounded-xl rental-agreement-document text-justify text-[12pt] leading-[1.6]">
+                    <h1 className="text-[18px] font-extrabold text-center underline mb-8 tracking-wider">
+                      RENTAL AGREEMENT
+                    </h1>
+                    
+                    <p className="mb-5 text-indent-0">
+                      THIS RENTAL AGREEMENT is made and executed on this {renderHighlight("AGREEMENT_DATE")}, at {renderHighlight("AGREEMENT_PLACE")} by and between:
+                    </p>
+                    
+                    <p className="mb-5">
+                      <strong>{renderHighlight("OWNER_NAME")}</strong>, {renderHighlight("OWNER_PARENT")}, Aged {renderHighlight("OWNER_AGE")}, {renderHighlight("OWNER_ADDRESS")}, hereinafter called as the "OWNER", ONE PART,
+                    </p>
+                    
+                    <p className="mb-5 font-bold text-center">AND</p>
+                    
+                    <p className="mb-5">
+                      <strong>{renderHighlight("TENANT_NAME")}</strong> {renderHighlight("TENANT_PARENT")}, Aged {renderHighlight("TENANT_AGE")}, {renderHighlight("TENANT_ADDRESS")}, hereinafter called as the TENANT, SECOND PART.
+                    </p>
+                    
+                    <p className="mb-5">
+                      The TENANT has approached and requested the OWNER to rent out the building for Commercial Purpose {renderHighlight("PREMISES_ADDRESS")}, Consists {renderHighlight("PREMISES_DESCRIPTION")}, the Tenant has approached the owner let out the schedule shop premises for his {renderHighlight("BUSINESS_NAME")} for Commercial Purpose, The OWNER has agreed for the same.
+                    </p>
+                    
+                    <p className="mb-5">
+                      The OWNER and the TENANT are making this Rental Agreement on the following terms and conditions:
+                    </p>
+                    
+                    <ol className="list-decimal pl-8 mb-5 space-y-3">
+                      {agreementConditions
+                        .filter(cond => cond.checked)
+                        .map((cond, idx) => (
+                          <li key={cond.id || idx} className="pl-2">
+                            {renderClauseWithHighlights(cond.text)}
+                          </li>
+                        ))}
+                    </ol>
+                    
+                    <p className="mb-5">
+                      IN WITNESSES THEREOF THE OWNER and the TENANT have signed this rental agreement on the day, month and year mentioned above.
+                    </p>
+                    
+                    <div className="mt-14 flex justify-between">
+                      <div className="w-[45%] flex flex-col items-center">
+                        <span className="border-b border-slate-900 w-full text-center pb-2 font-bold text-sm">
+                          ({formData["OWNER_SIG_NAMES"] || "OWNER"})
+                        </span>
+                        <span className="mt-2 text-xs font-bold text-slate-800">OWNER</span>
+                      </div>
+                      <div className="w-[45%] flex flex-col items-center">
+                        <span className="border-b border-slate-900 w-full text-center pb-2 font-bold text-sm">
+                          ({formData["TENANT_SIG_NAMES"] || "TENANT"})
+                        </span>
+                        <span className="mt-2 text-xs font-bold text-slate-800">TENANT</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-12 flex flex-col gap-2">
+                      <h3 className="text-sm underline font-bold mb-1">Witnesses:</h3>
+                      <p>1.</p>
+                      <p>2.</p>
+                    </div>
+                  </div>
+                </div>'''
+
+replacement_draft_view = '''                <div className={`w-full max-w-[800px] ${activePreviewTab === "draft" ? "block" : "hidden"}`}>
+                  <div className="bg-white text-slate-900 px-12 py-14 shadow-xl border border-slate-200 rounded-xl rental-agreement-document text-justify text-[12pt] leading-[1.6]">
+                    {selectedTemplateId ? (
+                      <div>
+                        <h1 className="text-[18px] font-extrabold text-center underline mb-8 tracking-wider uppercase">
+                          {editorTitle}
+                        </h1>
+                        <div className="whitespace-pre-wrap font-serif text-[12pt] leading-[1.7] text-slate-800 text-left">
+                          {(() => {
+                            const currentTemplate = customTemplates.find(t => t.id === selectedTemplateId);
+                            if (!currentTemplate || !currentTemplate.content) return null;
+                            
+                            const regex = /(\{\{[A-Za-z0-9_]+\}\}|\[[A-Za-z0-9_]+\])/g;
+                            const parts = currentTemplate.content.split(regex);
+
+                            return parts.map((part, index) => {
+                              const matchCurly = part.match(/^\{\{([A-Za-z0-9_]+)\}\}$/);
+                              const matchBracket = part.match(/^\[([A-Za-z0-9_]+)\]$/);
+                              const key = (matchCurly && matchCurly[1]) || (matchBracket && matchBracket[1]);
+
+                              if (key) {
+                                const val = formData[key];
+                                const isFilled = val && val.trim() !== "";
+                                return (
+                                  <span
+                                    key={index}
+                                    className={`font-semibold px-1 py-0.5 rounded transition-all ${
+                                      isFilled
+                                        ? "bg-emerald-50 text-emerald-850 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                        : "bg-amber-100 text-amber-850 dark:bg-amber-950/40 dark:text-amber-300 animate-pulse border-b-2 border-amber-400"
+                                    }`}
+                                  >
+                                    {isFilled ? val : `[${key}]`}
+                                  </span>
+                                );
+                              }
+
+                              return part.split("\\n").map((line, lineIdx, array) => (
+                                <span key={`${index}-${lineIdx}`}>
+                                  {line}
+                                  {lineIdx < array.length - 1 && <br />}
+                                </span>
+                              ));
+                            });
+                          })()}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h1 className="text-[18px] font-extrabold text-center underline mb-8 tracking-wider">
+                          RENTAL AGREEMENT
+                        </h1>
+                        
+                        <p className="mb-5 text-indent-0">
+                          THIS RENTAL AGREEMENT is made and executed on this {renderHighlight("AGREEMENT_DATE")}, at {renderHighlight("AGREEMENT_PLACE")} by and between:
+                        </p>
+                        
+                        <p className="mb-5">
+                          <strong>{renderHighlight("OWNER_NAME")}</strong>, {renderHighlight("OWNER_PARENT")}, Aged {renderHighlight("OWNER_AGE")}, {renderHighlight("OWNER_ADDRESS")}, hereinafter called as the "OWNER", ONE PART,
+                        </p>
+                        
+                        <p className="mb-5 font-bold text-center">AND</p>
+                        
+                        <p className="mb-5">
+                          <strong>{renderHighlight("TENANT_NAME")}</strong> {renderHighlight("TENANT_PARENT")}, Aged {renderHighlight("TENANT_AGE")}, {renderHighlight("TENANT_ADDRESS")}, hereinafter called as the TENANT, SECOND PART.
+                        </p>
+                        
+                        <p className="mb-5">
+                          The TENANT has approached and requested the OWNER to rent out the building for Commercial Purpose {renderHighlight("PREMISES_ADDRESS")}, Consists {renderHighlight("PREMISES_DESCRIPTION")}, the Tenant has approached the owner let out the schedule shop premises for his {renderHighlight("BUSINESS_NAME")} for Commercial Purpose, The OWNER has agreed for the same.
+                        </p>
+                        
+                        <p className="mb-5 font-semibold">
+                          NOW THIS AGREEMENT WITNESSETH AS FOLLOWS:
+                        </p>
+                        
+                        <p className="mb-5">
+                          The OWNER and the TENANT are making this Rental Agreement on the following terms and conditions:
+                        </p>
+                        
+                        <ol className="list-decimal pl-8 mb-5 space-y-3">
+                          {agreementConditions
+                            .filter(cond => cond.checked)
+                            .map((cond, idx) => (
+                              <li key={cond.id || idx} className="pl-2">
+                                {renderClauseWithHighlights(cond.text)}
+                              </li>
+                            ))}
+                        </ol>
+                        
+                        <p className="mb-5">
+                          IN WITNESSES THEREOF THE OWNER and the TENANT have signed this rental agreement on the day, month and year mentioned above.
+                        </p>
+                        
+                        <div className="mt-14 flex justify-between">
+                          <div className="w-[45%] flex flex-col items-center">
+                            <span className="border-b border-slate-900 w-full text-center pb-2 font-bold text-sm">
+                              ({formData["OWNER_SIG_NAMES"] || "OWNER"})
+                            </span>
+                            <span className="mt-2 text-xs font-bold text-slate-800">OWNER</span>
+                          </div>
+                          <div className="w-[45%] flex flex-col items-center">
+                            <span className="border-b border-slate-900 w-full text-center pb-2 font-bold text-sm">
+                              ({formData["TENANT_SIG_NAMES"] || "TENANT"})
+                            </span>
+                            <span className="mt-2 text-xs font-bold text-slate-800">TENANT</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-12 flex flex-col gap-2">
+                          <h3 className="text-sm underline font-bold mb-1">Witnesses:</h3>
+                          <p>1.</p>
+                          <p>2.</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>'''
+
+if target_draft_view in content:
+    content = content.replace(target_draft_view, replacement_draft_view)
+    print("Editor HTML Draft View custom preview added successfully")
+else:
+    print("Warning: target_draft_view not found")
+
+# Restore line endings to CRLF if file originally had it
+if has_crlf:
+    content = content.replace("\n", "\r\n")
+
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(content)
+
+print("App.jsx updated successfully!")

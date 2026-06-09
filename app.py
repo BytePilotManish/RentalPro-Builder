@@ -13,10 +13,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 # Import Database & Auth modules
-from database import Base, engine, User, Agreement, get_db, SessionLocal
+from database import Base, engine, User, Agreement, Notification, Template, Tenant, Owner, Property, get_db, SessionLocal
 from auth import hash_password, verify_password, create_access_token, decode_access_token
 from runtime_paths import resource_dir, data_dir
 import updater
+from kannada_helper import unicode_to_nudi
 
 DEFAULT_CONDITIONS = [
     "This RENTAL AGREEMENT is for a period of {{LEASE_PERIOD}} from the date of execution of this agreement i.e., on {{LEASE_END_DATE}}.",
@@ -58,7 +59,24 @@ def startup_db_seed():
             conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN master_conditions TEXT"))
         print("[MIGRATION] Added master_conditions column to users table successfully.")
     except Exception as e:
-        # Column likely already exists
+        pass
+
+    # Attempt to add template_id column dynamically to agreements table
+    try:
+        with engine.begin() as conn:
+            import sqlalchemy
+            conn.execute(sqlalchemy.text("ALTER TABLE agreements ADD COLUMN template_id INTEGER"))
+        print("[MIGRATION] Added template_id column to agreements table successfully.")
+    except Exception as e:
+        pass
+
+    # Attempt to add output_dir column dynamically to users table
+    try:
+        with engine.begin() as conn:
+            import sqlalchemy
+            conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN output_dir TEXT"))
+        print("[MIGRATION] Added output_dir column to users table successfully.")
+    except Exception as e:
         pass
 
     Base.metadata.create_all(bind=engine)
@@ -174,6 +192,141 @@ def startup_db_seed():
                         print(f"[WARNING] PDF conversion failed during startup regeneration for Agreement ID {ag.id}.")
                 except Exception as ex:
                     print(f"[ERROR] Failed to regenerate files for Agreement ID {ag.id}: {ex}")
+        
+        # Seed default notifications for users if they don't have any
+        users = db.query(User).all()
+        for u in users:
+            if db.query(Notification).filter(Notification.user_id == u.id).count() == 0:
+                print(f"Seeding default notifications for user: {u.email}...")
+                n1 = Notification(
+                    user_id=u.id,
+                    title_key="verifyApproved",
+                    desc_key="aadharVerified"
+                )
+                n2 = Notification(
+                    user_id=u.id,
+                    title_key="systemReady",
+                    desc_key="systemReadyDesc"
+                )
+        # Seed default tenants if they don't exist yet
+        admin_user = db.query(User).filter(User.email == "admin@rentalpro.com").first()
+        if admin_user:
+            default_tenants_info = [
+                {
+                    "name": "Mr. RAJUGOWDA",
+                    "phone": "+91 9900112233",
+                    "email": "rajugowda@gmail.com",
+                    "guardian": "S/O Subbegowda",
+                    "age": 47,
+                    "address": "No. 18, 3rd Cross, Rajeev Gandhi Nagar, Laggere, Bengaluru-560 058",
+                    "aadhar": "1234-5678-9012"
+                },
+                {
+                    "name": "Mr. AMIT KUMAR",
+                    "phone": "+91 9876543210",
+                    "email": "amit.kumar@outlook.com",
+                    "guardian": "S/O Ram Kumar",
+                    "age": 30,
+                    "address": "Flat 402, Greenfield Apartments, Laggere, Bengaluru-560 058",
+                    "aadhar": "9876-5432-1098"
+                },
+                {
+                    "name": "Mrs. LAKSHMI DEVI",
+                    "phone": "+91 9448833221",
+                    "email": "lakshmi.devi@yahoo.com",
+                    "guardian": "W/O Venkatesh",
+                    "age": 38,
+                    "address": "No. 45, Chowdeshwari Nagar, Laggere, Bengaluru-560 058",
+                    "aadhar": "4567-8901-2345"
+                }
+            ]
+            for t_info in default_tenants_info:
+                exists = db.query(Tenant).filter(
+                    Tenant.user_id == admin_user.id,
+                    Tenant.name == t_info["name"]
+                ).first()
+                if not exists:
+                    print(f"=== SEEDING TENANT: {t_info['name']} ===")
+                    new_t = Tenant(
+                        user_id=admin_user.id,
+                        name=t_info["name"],
+                        phone=t_info["phone"],
+                        email=t_info["email"],
+                        guardian=t_info["guardian"],
+                        age=t_info["age"],
+                        address=t_info["address"],
+                        aadhar=t_info["aadhar"]
+                    )
+                    db.add(new_t)
+
+            # Seed default owners if they don't exist yet
+            default_owners_info = [
+                {
+                    "name": "Mr. MANOJ M & SANCHITHA C J",
+                    "phone": "+91 9886655443",
+                    "email": "manoj.sanchitha@gmail.com",
+                    "guardian": "S/O T Mahesh",
+                    "age": 45,
+                    "address": "No,99,100 C Near Sri Kalikamba Temple, ChowdeshwariNagar, , Laggere, Bengaluru- 560 058"
+                },
+                {
+                    "name": "Mrs. LATHA SHARMA",
+                    "phone": "+91 9775533112",
+                    "email": "latha.sharma@gmail.com",
+                    "guardian": "W/O R K Sharma",
+                    "age": 42,
+                    "address": "No. 24, Greenfield Heights, Laggere, Bengaluru-560 058"
+                }
+            ]
+            for o_info in default_owners_info:
+                exists = db.query(Owner).filter(
+                    Owner.user_id == admin_user.id,
+                    Owner.name == o_info["name"]
+                ).first()
+                if not exists:
+                    print(f"=== SEEDING OWNER: {o_info['name']} ===")
+                    new_o = Owner(
+                        user_id=admin_user.id,
+                        name=o_info["name"],
+                        phone=o_info["phone"],
+                        email=o_info["email"],
+                        guardian=o_info["guardian"],
+                        age=o_info["age"],
+                        address=o_info["address"]
+                    )
+                    db.add(new_o)
+
+            # Seed default properties if they don't exist yet
+            default_properties_info = [
+                {
+                    "name": "Laggere Commercial Shop",
+                    "address": "No.99 & 100C, Near Sri Kalikamba Temple Chowdeshwari Nagar, Laggere, Bengaluru- 560 058",
+                    "description": "One RCC Roofed Shops, with rolling Shutter and electricity, Toilet and water facility",
+                    "business_name": "J S TRADERS"
+                },
+                {
+                    "name": "Sharma Groceries Premises",
+                    "address": "Flat 402, Greenfield Apartments, Laggere, Bengaluru-560 058",
+                    "description": "Commercial retail ground floor shop space with basic fixtures, electricity, and private washroom.",
+                    "business_name": "SHARMA GROCERIES"
+                }
+            ]
+            for p_info in default_properties_info:
+                exists = db.query(Property).filter(
+                    Property.user_id == admin_user.id,
+                    Property.name == p_info["name"]
+                ).first()
+                if not exists:
+                    print(f"=== SEEDING PROPERTY: {p_info['name']} ===")
+                    new_p = Property(
+                        user_id=admin_user.id,
+                        name=p_info["name"],
+                        address=p_info["address"],
+                        description=p_info["description"],
+                        business_name=p_info["business_name"]
+                    )
+                    db.add(new_p)
+        db.commit()
     except Exception as e:
         print(f"Seeding error: {e}")
     finally:
@@ -247,10 +400,41 @@ class AgreementData(BaseModel):
 class SaveAgreementPayload(BaseModel):
     id: int | None = None
     title: str
-    data: AgreementData
+    data: dict
+    template_id: int | None = None
+
+class CreateNotificationPayload(BaseModel):
+    title: str | None = None
+    desc: str | None = None
+    title_key: str | None = None
+    desc_key: str | None = None
+    params: dict | None = None
+
+class TenantCreate(BaseModel):
+    name: str
+    phone: str | None = None
+    email: str | None = None
+    guardian: str | None = None
+    age: int | None = None
+    address: str | None = None
+    aadhar: str | None = None
+
+class OwnerCreate(BaseModel):
+    name: str
+    phone: str | None = None
+    email: str | None = None
+    guardian: str | None = None
+    age: int | None = None
+    address: str | None = None
+
+class PropertyCreate(BaseModel):
+    name: str
+    address: str
+    description: str | None = None
+    business_name: str | None = None
 
 # Helper to perform find-and-replace
-def replace_placeholders(doc, data: dict):
+def replace_placeholders(doc, data: dict, font_name: str = 'Times New Roman'):
     clauses = data.get("AGREEMENT_CONDITIONS", [])
     if isinstance(clauses, str):
         clauses = [c.strip() for c in clauses.split("\n") if c.strip()]
@@ -275,7 +459,7 @@ def replace_placeholders(doc, data: dict):
                 if not new_p.runs:
                     new_p.add_run()
                 for run in new_p.runs:
-                    run.font.name = 'Times New Roman'
+                    run.font.name = font_name
                     run.font.size = docx.shared.Pt(12)
             
             # Remove the placeholder paragraph
@@ -288,19 +472,19 @@ def replace_placeholders(doc, data: dict):
         for key, val in data.items():
             if key == "AGREEMENT_CONDITIONS":
                 continue
-            placeholder = f"{{{{{key}}}}}"
-            if placeholder in text_before:
-                for run in p.runs:
-                    if placeholder in run.text:
-                        run.text = run.text.replace(placeholder, str(val))
-                        run.font.size = docx.shared.Pt(12)
-                        run.font.name = 'Times New Roman'
-                if placeholder in p.text:
-                    p.text = p.text.replace(placeholder, str(val))
+            for placeholder in [f"{{{{{key}}}}}", f"[{key}]"]:
+                if placeholder in text_before:
                     for run in p.runs:
-                        run.font.size = docx.shared.Pt(12)
-                        run.font.name = 'Times New Roman'
-                    
+                        if placeholder in run.text:
+                            run.text = run.text.replace(placeholder, str(val or ""))
+                            run.font.size = docx.shared.Pt(12)
+                            run.font.name = font_name
+                    if placeholder in p.text:
+                        p.text = p.text.replace(placeholder, str(val or ""))
+                        for run in p.runs:
+                            run.font.size = docx.shared.Pt(12)
+                            run.font.name = font_name
+
     # Replace in tables
     for table in doc.tables:
         for row in table.rows:
@@ -310,20 +494,20 @@ def replace_placeholders(doc, data: dict):
                     for key, val in data.items():
                         if key == "AGREEMENT_CONDITIONS":
                             continue
-                        placeholder = f"{{{{{key}}}}}"
-                        if placeholder in text_before:
-                            for run in p.runs:
-                                if placeholder in run.text:
-                                    run.text = run.text.replace(placeholder, str(val))
-                                    if run.font.size is None:
-                                        run.font.size = docx.shared.Pt(12)
-                                    if run.font.name is None:
-                                        run.font.name = 'Times New Roman'
-                            if placeholder in p.text:
-                                p.text = p.text.replace(placeholder, str(val))
+                        for placeholder in [f"{{{{{key}}}}}", f"[{key}]"]:
+                            if placeholder in text_before:
                                 for run in p.runs:
-                                    run.font.size = docx.shared.Pt(12)
-                                    run.font.name = 'Times New Roman'
+                                    if placeholder in run.text:
+                                        run.text = run.text.replace(placeholder, str(val or ""))
+                                        if run.font.size is None:
+                                            run.font.size = docx.shared.Pt(12)
+                                        if run.font.name is None:
+                                            run.font.name = font_name
+                                if placeholder in p.text:
+                                    p.text = p.text.replace(placeholder, str(val or ""))
+                                    for run in p.runs:
+                                        run.font.size = docx.shared.Pt(12)
+                                        run.font.name = font_name
 
 # Helper to convert docx to pdf
 def docx_to_pdf(docx_path, pdf_path):
@@ -430,6 +614,13 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
+    # Seed default notifications for new user
+    n1 = Notification(user_id=new_user.id, title_key="verifyApproved", desc_key="aadharVerified")
+    n2 = Notification(user_id=new_user.id, title_key="systemReady", desc_key="systemReadyDesc")
+    db.add(n1)
+    db.add(n2)
+    db.commit()
+    
     token = create_access_token({"sub": new_user.email})
     return {
         "token": token,
@@ -463,7 +654,8 @@ def get_me(user: User = Depends(get_current_user)):
     return {
         "email": user.email,
         "full_name": user.full_name,
-        "master_conditions": conds
+        "master_conditions": conds,
+        "output_dir": user.output_dir
     }
 
 class UpdateConditionsPayload(BaseModel):
@@ -474,6 +666,56 @@ def update_conditions(payload: UpdateConditionsPayload, user: User = Depends(get
     user.master_conditions = json.dumps(payload.conditions)
     db.commit()
     return {"detail": "Conditions updated successfully.", "conditions": payload.conditions}
+
+# --- USER SETTINGS ENDPOINTS ---
+
+class SaveSettingsPayload(BaseModel):
+    output_dir: str | None = None
+    full_name: str | None = None
+    password: str | None = None
+
+@app.put("/api/settings")
+def save_settings(payload: SaveSettingsPayload, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if payload.output_dir is not None:
+        cleaned_dir = payload.output_dir.strip()
+        if cleaned_dir:
+            # Check if directory exists, if not, try to create it to validate path
+            if not os.path.exists(cleaned_dir):
+                try:
+                    os.makedirs(cleaned_dir, exist_ok=True)
+                except Exception as e:
+                    raise HTTPException(status_code=400, detail=f"Invalid directory path or permission denied: {e}")
+            user.output_dir = cleaned_dir
+        else:
+            user.output_dir = None
+            
+    if payload.full_name is not None:
+        cleaned_name = payload.full_name.strip()
+        if not cleaned_name:
+            raise HTTPException(status_code=400, detail="Full Name cannot be empty.")
+        user.full_name = cleaned_name
+        
+    if payload.password is not None and payload.password.strip() != "":
+        user.hashed_password = hash_password(payload.password.strip())
+    
+    db.commit()
+    return {"status": "success", "output_dir": user.output_dir, "full_name": user.full_name}
+
+@app.post("/api/settings/browse-folder")
+def browse_folder(user: User = Depends(get_current_user)):
+    import tkinter as tk
+    from tkinter import filedialog
+    
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        folder = filedialog.askdirectory(parent=root, title="Select Output Saving Directory")
+        root.destroy()
+        return {"folder": folder or ""}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to open native directory browser: {e}")
+
 
 # --- SOFTWARE UPDATE ENDPOINTS ---
 
@@ -506,6 +748,7 @@ def list_agreements(user: User = Depends(get_current_user), db: Session = Depend
         result.append({
             "id": ag.id,
             "title": ag.title,
+            "template_id": ag.template_id,
             "data": parsed_data,
             "created_at": ag.created_at.isoformat(),
             "updated_at": ag.updated_at.isoformat(),
@@ -537,20 +780,60 @@ def save_and_generate_agreement(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not os.path.exists(TEMPLATE_PATH):
-        raise HTTPException(status_code=404, detail="TEMPLATE.docx not found.")
+    template = None
+    custom_docx_base_path = None
+    
+    if payload.template_id and payload.template_id != -1:
+        template = db.query(Template).filter(Template.id == payload.template_id, Template.user_id == user.id).first()
+        if not template:
+            raise HTTPException(status_code=404, detail="Selected custom template not found.")
+            
+        if template.has_file and template.file_path and os.path.exists(template.file_path):
+            custom_docx_base_path = template.file_path
 
     try:
         # Load Template
-        doc = docx.Document(TEMPLATE_PATH)
+        if payload.template_id == -1:
+            template_path = os.path.join(RESOURCE_DIR, "TEMPLATE_KAN.docx")
+            if not os.path.exists(template_path):
+                template_path = "TEMPLATE_KAN.docx"
+            if not os.path.exists(template_path):
+                raise HTTPException(status_code=404, detail="TEMPLATE_KAN.docx not found.")
+            doc = docx.Document(template_path)
+        elif custom_docx_base_path:
+            doc = docx.Document(custom_docx_base_path)
+        elif template:
+            doc = docx.Document()
+            style = doc.styles['Normal']
+            style.font.size = docx.shared.Pt(12)
+            style.font.name = 'Times New Roman'
+            
+            paragraphs = template.content.split("\n")
+            for p_text in paragraphs:
+                doc.add_paragraph(p_text)
+        else:
+            if not os.path.exists(TEMPLATE_PATH):
+                raise HTTPException(status_code=404, detail="TEMPLATE.docx not found.")
+            doc = docx.Document(TEMPLATE_PATH)
         
         # Configure Normal style
         style = doc.styles['Normal']
         style.font.size = docx.shared.Pt(12)
-        style.font.name = 'Times New Roman'
+        style.font.name = 'Nudi Akshar-02' if payload.template_id == -1 else 'Times New Roman'
         
         # Replace placeholders
-        replace_placeholders(doc, payload.data.model_dump())
+        if payload.template_id == -1:
+            translated_data = {}
+            for k, v in payload.data.items():
+                if isinstance(v, str):
+                    translated_data[k] = unicode_to_nudi(v)
+                elif isinstance(v, list):
+                    translated_data[k] = [unicode_to_nudi(item) if isinstance(item, str) else item for item in v]
+                else:
+                    translated_data[k] = v
+            replace_placeholders(doc, translated_data, font_name="Nudi Akshar-02")
+        else:
+            replace_placeholders(doc, payload.data, font_name="Times New Roman")
         
         # Generate unique filenames per agreement
         unique_id = str(uuid.uuid4())[:8]
@@ -558,8 +841,19 @@ def save_and_generate_agreement(
         docx_filename = f"agreement_{user.id}_{safe_title}_{unique_id}.docx"
         pdf_filename = f"agreement_{user.id}_{safe_title}_{unique_id}.pdf"
         
-        docx_path = os.path.join(OUTPUT_DIR, docx_filename)
-        pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
+        # Determine output folder: user-defined or default
+        out_dir = OUTPUT_DIR
+        if user.output_dir and os.path.exists(user.output_dir):
+            out_dir = user.output_dir
+        elif user.output_dir:
+            try:
+                os.makedirs(user.output_dir, exist_ok=True)
+                out_dir = user.output_dir
+            except Exception:
+                pass
+        
+        docx_path = os.path.join(out_dir, docx_filename)
+        pdf_path = os.path.join(out_dir, pdf_filename)
         
         # Save generated DOCX
         doc.save(docx_path)
@@ -585,15 +879,17 @@ def save_and_generate_agreement(
                 except Exception: pass
                 
             agreement.title = payload.title
-            agreement.agreement_data = json.dumps(payload.data.model_dump())
+            agreement.agreement_data = json.dumps(payload.data)
             agreement.docx_path = docx_path
             agreement.pdf_path = pdf_path
             agreement.updated_at = datetime.utcnow()
+            agreement.template_id = payload.template_id
         else:
             agreement = Agreement(
                 user_id=user.id,
+                template_id=payload.template_id,
                 title=payload.title,
-                agreement_data=json.dumps(payload.data.model_dump()),
+                agreement_data=json.dumps(payload.data),
                 docx_path=docx_path,
                 pdf_path=pdf_path
             )
@@ -601,6 +897,16 @@ def save_and_generate_agreement(
             
         db.commit()
         db.refresh(agreement)
+
+        # Add dynamic notification to DB
+        notif = Notification(
+            user_id=user.id,
+            title_key="agreementSavedTitle",
+            desc_key="agreementSavedDesc",
+            params=json.dumps({"title": agreement.title})
+        )
+        db.add(notif)
+        db.commit()
         
         return {
             "id": agreement.id,
@@ -627,6 +933,16 @@ def delete_agreement(agreement_id: int, user: User = Depends(get_current_user), 
             
     db.delete(agreement)
     db.commit()
+
+    # Add deletion notification to DB
+    notif = Notification(
+        user_id=user.id,
+        title_key="agreementDeletedTitle",
+        desc_key="agreementDeletedDesc"
+    )
+    db.add(notif)
+    db.commit()
+
     return {"detail": "Agreement deleted successfully."}
 
 # --- SECURED DOWNLOAD ENDPOINTS ---
@@ -660,6 +976,513 @@ def download_docx(agreement_id: int, token: str, db: Session = Depends(get_db)):
     if docx_path and os.path.exists(docx_path):
         return FileResponse(docx_path, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename=f"{agreement.title.replace(' ', '_')}.docx")
     raise HTTPException(status_code=404, detail="DOCX file not found on server.")
+
+
+# --- NOTIFICATION ENDPOINTS ---
+
+@app.get("/api/notifications")
+def get_notifications(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    notifs = db.query(Notification).filter(Notification.user_id == user.id).order_by(Notification.created_at.desc()).all()
+    result = []
+    for n in notifs:
+        result.append({
+            "id": n.id,
+            "title": n.title,
+            "desc": n.desc,
+            "title_key": n.title_key,
+            "desc_key": n.desc_key,
+            "params": json.loads(n.params) if n.params else None,
+            "created_at": n.created_at.isoformat()
+        })
+    return result
+
+@app.delete("/api/notifications/{notification_id}")
+def delete_notification(notification_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    notif = db.query(Notification).filter(Notification.id == notification_id, Notification.user_id == user.id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notification not found.")
+    db.delete(notif)
+    db.commit()
+    return {"status": "success", "message": "Notification deleted successfully."}
+
+@app.post("/api/notifications")
+def create_notification(payload: CreateNotificationPayload, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    notif = Notification(
+        user_id=user.id,
+        title=payload.title,
+        desc=payload.desc,
+        title_key=payload.title_key,
+        desc_key=payload.desc_key,
+        params=json.dumps(payload.params) if payload.params else None
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(notif)
+    return {
+        "id": notif.id,
+        "title": notif.title,
+        "desc": notif.desc,
+        "title_key": notif.title_key,
+        "desc_key": notif.desc_key,
+        "params": payload.params,
+        "created_at": notif.created_at.isoformat()
+    }
+
+
+# --- UPDATE ENDPOINTS ---
+
+@app.get("/api/update/check")
+def check_update(user: User = Depends(get_current_user)):
+    return {
+        "enabled": False,
+        "available": False,
+        "current": "1.0.0",
+        "latest": "1.0.0",
+        "notes": ""
+    }
+
+@app.post("/api/update/apply")
+def apply_update(user: User = Depends(get_current_user)):
+    raise HTTPException(status_code=400, detail="Auto-update works only in the installed desktop app.")
+
+
+# --- TEMPLATES ENDPOINTS ---
+
+from fastapi import Form, UploadFile, File
+import re
+from pypdf import PdfReader
+
+def extract_placeholders(text: str) -> list[str]:
+    # Match {{PLACEHOLDER}}
+    matches_curly = re.findall(r"\{\{([A-Za-z0-9_]+)\}\}", text)
+    # Match [PLACEHOLDER]
+    matches_bracket = re.findall(r"\[([A-Za-z0-9_]+)\]", text)
+    
+    unique = list(set(matches_curly + matches_bracket))
+    return sorted(unique)
+
+@app.post("/api/templates/parse")
+async def parse_template_file(
+    file: UploadFile = File(None),
+    text: str = Form(None),
+    user: User = Depends(get_current_user)
+):
+    extracted_text = ""
+    if file:
+        filename = file.filename.lower()
+        if filename.endswith(".docx"):
+            import docx
+            try:
+                import io
+                contents = await file.read()
+                doc = docx.Document(io.BytesIO(contents))
+                paragraphs_text = [p.text for p in doc.paragraphs]
+                for table in doc.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            paragraphs_text.append(cell.text)
+                extracted_text = "\n".join(paragraphs_text)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Failed to parse DOCX file: {e}")
+        elif filename.endswith(".pdf"):
+            try:
+                import io
+                contents = await file.read()
+                reader = PdfReader(io.BytesIO(contents))
+                pages_text = []
+                for page in reader.pages:
+                    txt = page.extract_text()
+                    if txt:
+                        pages_text.append(txt)
+                extracted_text = "\n".join(pages_text)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Failed to parse PDF file: {e}")
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a .docx or .pdf file.")
+    elif text:
+        extracted_text = text
+    else:
+        raise HTTPException(status_code=400, detail="No file or text provided for parsing.")
+
+    placeholders = extract_placeholders(extracted_text)
+    return {
+        "text": extracted_text,
+        "placeholders": placeholders
+    }
+
+@app.get("/api/templates")
+def get_templates(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    customs = db.query(Template).filter(Template.user_id == user.id).order_by(Template.created_at.desc()).all()
+    result = []
+    for c in customs:
+        result.append({
+            "id": c.id,
+            "title": c.title,
+            "description": c.description,
+            "content": c.content,
+            "placeholders": json.loads(c.placeholders) if c.placeholders else [],
+            "has_file": c.has_file,
+            "file_path": c.file_path,
+            "is_custom": True
+        })
+    return result
+
+@app.post("/api/templates")
+async def create_template(
+    title: str = Form(...),
+    description: str = Form(""),
+    content: str = Form(""),
+    placeholders: str = Form("[]"),
+    file: UploadFile = File(None),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    templates_dir = os.path.join(data_dir(), "templates")
+    os.makedirs(templates_dir, exist_ok=True)
+    
+    file_path = None
+    has_file = 0
+    parsed_placeholders = json.loads(placeholders)
+    
+    if file:
+        has_file = 1
+        filename = file.filename.lower()
+        unique_prefix = str(uuid.uuid4())[:8]
+        safe_filename = f"user_template_{user.id}_{unique_prefix}_{file.filename}"
+        file_path = os.path.join(templates_dir, safe_filename)
+        
+        file_contents = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(file_contents)
+            
+        if not content:
+            import io
+            if filename.endswith(".docx"):
+                try:
+                    doc = docx.Document(io.BytesIO(file_contents))
+                    content = "\n".join([p.text for p in doc.paragraphs])
+                except Exception:
+                    pass
+            elif filename.endswith(".pdf"):
+                try:
+                    reader = PdfReader(io.BytesIO(file_contents))
+                    content = "\n".join([page.extract_text() or "" for page in reader.pages])
+                except Exception:
+                    pass
+
+    new_template = Template(
+        user_id=user.id,
+        title=title,
+        description=description,
+        content=content,
+        placeholders=json.dumps(parsed_placeholders),
+        file_path=file_path,
+        has_file=has_file
+    )
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    
+    notif = Notification(
+        user_id=user.id,
+        title="Custom Template Added",
+        desc=f"Template \"{title}\" has been successfully created and registered.",
+        title_key=None,
+        desc_key=None
+    )
+    db.add(notif)
+    db.commit()
+
+    return {
+        "id": new_template.id,
+        "title": new_template.title,
+        "description": new_template.description,
+        "placeholders": parsed_placeholders,
+        "has_file": new_template.has_file
+    }
+
+@app.delete("/api/templates/{template_id}")
+def delete_template(template_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    tmpl = db.query(Template).filter(Template.id == template_id, Template.user_id == user.id).first()
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template not found.")
+        
+    if tmpl.file_path and os.path.exists(tmpl.file_path):
+        try: os.remove(tmpl.file_path)
+        except Exception: pass
+        
+    db.delete(tmpl)
+    db.commit()
+    return {"status": "success", "detail": "Template deleted successfully."}
+
+
+# --- TENANTS ENDPOINTS ---
+
+@app.get("/api/tenants")
+def get_tenants(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    tenants = db.query(Tenant).filter(Tenant.user_id == user.id).order_by(Tenant.name.asc()).all()
+    result = []
+    for t in tenants:
+        result.append({
+            "id": t.id,
+            "name": t.name,
+            "phone": t.phone,
+            "email": t.email,
+            "guardian": t.guardian,
+            "age": t.age,
+            "address": t.address,
+            "aadhar": t.aadhar,
+            "created_at": t.created_at.isoformat()
+        })
+    return result
+
+@app.post("/api/tenants")
+def create_tenant(payload: TenantCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    t = Tenant(
+        user_id=user.id,
+        name=payload.name,
+        phone=payload.phone,
+        email=payload.email,
+        guardian=payload.guardian,
+        age=payload.age,
+        address=payload.address,
+        aadhar=payload.aadhar
+    )
+    db.add(t)
+    db.commit()
+    db.refresh(t)
+    
+    # Save a notification
+    notif = Notification(
+        user_id=user.id,
+        title="Tenant Registered",
+        desc=f"Tenant \"{t.name}\" has been successfully added to your registry."
+    )
+    db.add(notif)
+    db.commit()
+    
+    return {
+        "id": t.id,
+        "name": t.name,
+        "phone": t.phone,
+        "email": t.email,
+        "guardian": t.guardian,
+        "age": t.age,
+        "address": t.address,
+        "aadhar": t.aadhar,
+        "created_at": t.created_at.isoformat()
+    }
+
+@app.put("/api/tenants/{tenant_id}")
+def update_tenant(tenant_id: int, payload: TenantCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    t = db.query(Tenant).filter(Tenant.id == tenant_id, Tenant.user_id == user.id).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Tenant not found.")
+    
+    t.name = payload.name
+    t.phone = payload.phone
+    t.email = payload.email
+    t.guardian = payload.guardian
+    t.age = payload.age
+    t.address = payload.address
+    t.aadhar = payload.aadhar
+    
+    db.commit()
+    db.refresh(t)
+    return {
+        "id": t.id,
+        "name": t.name,
+        "phone": t.phone,
+        "email": t.email,
+        "guardian": t.guardian,
+        "age": t.age,
+        "address": t.address,
+        "aadhar": t.aadhar,
+        "created_at": t.created_at.isoformat()
+    }
+
+@app.delete("/api/tenants/{tenant_id}")
+def delete_tenant(tenant_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    t = db.query(Tenant).filter(Tenant.id == tenant_id, Tenant.user_id == user.id).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Tenant not found.")
+    
+    db.delete(t)
+    db.commit()
+    return {"status": "success", "detail": "Tenant deleted successfully."}
+
+
+# --- OWNERS ENDPOINTS ---
+
+@app.get("/api/owners")
+def get_owners(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    owners = db.query(Owner).filter(Owner.user_id == user.id).order_by(Owner.name.asc()).all()
+    result = []
+    for o in owners:
+        result.append({
+            "id": o.id,
+            "name": o.name,
+            "phone": o.phone,
+            "email": o.email,
+            "guardian": o.guardian,
+            "age": o.age,
+            "address": o.address,
+            "created_at": o.created_at.isoformat()
+        })
+    return result
+
+@app.post("/api/owners")
+def create_owner(payload: OwnerCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    o = Owner(
+        user_id=user.id,
+        name=payload.name,
+        phone=payload.phone,
+        email=payload.email,
+        guardian=payload.guardian,
+        age=payload.age,
+        address=payload.address
+    )
+    db.add(o)
+    db.commit()
+    db.refresh(o)
+    
+    # Save a notification
+    notif = Notification(
+        user_id=user.id,
+        title="Owner Registered",
+        desc=f"Owner \"{o.name}\" has been successfully added to your registry."
+    )
+    db.add(notif)
+    db.commit()
+    
+    return {
+        "id": o.id,
+        "name": o.name,
+        "phone": o.phone,
+        "email": o.email,
+        "guardian": o.guardian,
+        "age": o.age,
+        "address": o.address,
+        "created_at": o.created_at.isoformat()
+    }
+
+@app.put("/api/owners/{owner_id}")
+def update_owner(owner_id: int, payload: OwnerCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    o = db.query(Owner).filter(Owner.id == owner_id, Owner.user_id == user.id).first()
+    if not o:
+        raise HTTPException(status_code=404, detail="Owner not found.")
+    
+    o.name = payload.name
+    o.phone = payload.phone
+    o.email = payload.email
+    o.guardian = payload.guardian
+    o.age = payload.age
+    o.address = payload.address
+    
+    db.commit()
+    db.refresh(o)
+    return {
+        "id": o.id,
+        "name": o.name,
+        "phone": o.phone,
+        "email": o.email,
+        "guardian": o.guardian,
+        "age": o.age,
+        "address": o.address,
+        "created_at": o.created_at.isoformat()
+    }
+
+@app.delete("/api/owners/{owner_id}")
+def delete_owner(owner_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    o = db.query(Owner).filter(Owner.id == owner_id, Owner.user_id == user.id).first()
+    if not o:
+        raise HTTPException(status_code=404, detail="Owner not found.")
+    
+    db.delete(o)
+    db.commit()
+    return {"status": "success", "detail": "Owner deleted successfully."}
+
+
+# --- PROPERTIES ENDPOINTS ---
+
+@app.get("/api/properties")
+def get_properties(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    properties = db.query(Property).filter(Property.user_id == user.id).order_by(Property.name.asc()).all()
+    result = []
+    for p in properties:
+        result.append({
+            "id": p.id,
+            "name": p.name,
+            "address": p.address,
+            "description": p.description,
+            "business_name": p.business_name,
+            "created_at": p.created_at.isoformat()
+        })
+    return result
+
+@app.post("/api/properties")
+def create_property(payload: PropertyCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    p = Property(
+        user_id=user.id,
+        name=payload.name,
+        address=payload.address,
+        description=payload.description,
+        business_name=payload.business_name
+    )
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    
+    # Save a notification
+    notif = Notification(
+        user_id=user.id,
+        title="Property Registered",
+        desc=f"Property asset \"{p.name}\" has been successfully added to your registry."
+    )
+    db.add(notif)
+    db.commit()
+    
+    return {
+        "id": p.id,
+        "name": p.name,
+        "address": p.address,
+        "description": p.description,
+        "business_name": p.business_name,
+        "created_at": p.created_at.isoformat()
+    }
+
+@app.put("/api/properties/{property_id}")
+def update_property(property_id: int, payload: PropertyCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    p = db.query(Property).filter(Property.id == property_id, Property.user_id == user.id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Property not found.")
+    
+    p.name = payload.name
+    p.address = payload.address
+    p.description = payload.description
+    p.business_name = payload.business_name
+    
+    db.commit()
+    db.refresh(p)
+    return {
+        "id": p.id,
+        "name": p.name,
+        "address": p.address,
+        "description": p.description,
+        "business_name": p.business_name,
+        "created_at": p.created_at.isoformat()
+    }
+
+@app.delete("/api/properties/{property_id}")
+def delete_property(property_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    p = db.query(Property).filter(Property.id == property_id, Property.user_id == user.id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Property not found.")
+    
+    db.delete(p)
+    db.commit()
+    return {"status": "success", "detail": "Property deleted successfully."}
+
 
 # Serve Static files at root
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

@@ -12,3 +12,19 @@
 .rental-agreement-document {
   font-family: 'Times New Roman', Times, serif;
 }
+
+/* Custom scrollbar utility for dashboard containers */
+.custom-scrollbar-minimal::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar-minimal::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar-minimal::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 9999px;
+}
+.custom-scrollbar-minimal::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
