@@ -2,7 +2,7 @@
 ; Requires dist\RentalPro\ from PyInstaller (run build_desktop.bat first).
 
 #define MyAppName "Rental Pro"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.71"
 #define MyAppPublisher "BytePilot Manish"
 #define MyAppExeName "RentalPro.exe"
 

@@ -11,7 +11,7 @@ To ENABLE auto-update, set GITHUB_OWNER and GITHUB_REPO once below.
 Leave them blank to disable update checks (app still works normally).
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.71"
 
 # e.g. GITHUB_OWNER = "manoj", GITHUB_REPO = "rental-pro"
 GITHUB_OWNER = "BytePilotManish"

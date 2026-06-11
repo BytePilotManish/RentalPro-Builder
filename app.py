@@ -5,12 +5,35 @@ import docx
 import pythoncom
 import win32com.client
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Body, Depends
+import random
+import time
+import threading
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from fastapi import FastAPI, HTTPException, Body, Depends, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+def _load_dotenv():
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.isfile(env_file):
+        return
+    with open(env_file, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            key, val = key.strip(), val.strip().strip('"').strip("'")
+            if key:
+                os.environ[key] = val
+
+_load_dotenv()
 
 # Import Database & Auth modules
 from database import Base, engine, User, Agreement, Notification, Template, Tenant, Owner, Property, get_db, SessionLocal
@@ -18,6 +41,7 @@ from auth import hash_password, verify_password, create_access_token, decode_acc
 from runtime_paths import resource_dir, data_dir
 import updater
 from kannada_helper import unicode_to_nudi
+
 
 DEFAULT_CONDITIONS = [
     "This RENTAL AGREEMENT is for a period of {{LEASE_PERIOD}} from the date of execution of this agreement i.e., on {{LEASE_END_DATE}}.",
@@ -29,6 +53,18 @@ DEFAULT_CONDITIONS = [
     "The TENANT should pay the Electricity and water charges utilized for his own use as per the actual meter reading for the rented premises during the period of tenancy.",
     "The tenancy period may be renewed for further period of {{LEASE_PERIOD_NUM}} months by mutual agreement between the OWNER and TENANT on the terms and conditions to be specified at that time.",
     "The OWNER and TENANT have agreed that {{NOTICE_PERIOD}} prior notice on either side is required for the termination of the tenancy period."
+]
+
+DEFAULT_KANNADA_CONDITIONS = [
+    "ಸದರಿ ಮನೆಗೆ ಮುಂಗಡ (ಭದ್ರತಾ ಠೇವಣಿ) ಹಣವಾಗಿ ರೂ.{{DEPOSIT_AMOUNT}}/- ({{DEPOSIT_AMOUNT_WORDS}}) ರೂಪಾಯಿಗಳನ್ನು ನಿಮಗೆ ಈ ಕೆಳಕಂಡ ಸಾಕ್ಷಿದಾರರ ಸಮಕ್ಷಮ ನಗದು ರೂಪದಲ್ಲಿ ಪಾವತಿಮಾಡಿರುತ್ತೇನೆ.  ಸದರಿ ಮುಂಗಡ ಹಣಕ್ಕೆ ತಾವು ಯಾವುದೇ ರೀತಿಯ ಬಡ್ಡಿಯನ್ನು ಕೊಡಬೇಕಾಗಿಲ್ಲ ಮತ್ತು  ಸದರಿ ಹಣವನ್ನು  ಮನೆಯನ್ನು ಖಾಲೀ ಮಾಡಿ ನಿಮ್ಮ ಸ್ವಾಧೀನಕ್ಕೆ ಕೊಡುವಾಗ ಒಂದೇ ಕಂತಿನಲ್ಲಿ ಹಿಂದಿರುಗಿಸತಕ್ಕದ್ದು.",
+    "ಸದರಿ ಮನೆಗೆ ಬಾಡಿಗೆಯಾಗಿ ರೂ.{{RENT_AMOUNT}}/- ({{RENT_AMOUNT_WORDS}}) ರೂಪಾಯಿಗಳನ್ನು ನಿಗಧಿ ಮಾಡಿದ್ದು,  ಸದರಿ ಬಾಡಿಗೆಯನ್ನು ಪ್ರತಿ ಮಾಹೇ {{RENT_PAYMENT_DAY}} ನೇ ದಿನಾಂಕದ ಒಳಗೆ ತಪ್ಪದೇ ಪಾವತಿಮಾಡುತ್ತೇನೆ.",
+    "ಮೇಲ್ಕಂಡ ಸದರಿ ಮನೆಗೆ ದಿನಾಂಕ: {{LEASE_START_DATE}} ರಿಂದ {{LEASE_PERIOD_NUM}} ({{LEASE_PERIOD}}) ತಿಂಗಳು ಅವಧಿಯನ್ನು ಗೊತ್ತುಪಡಿಸಲಾಗಿರುತ್ತದೆ.",
+    "ಸದರಿ ಮನೆಯಲ್ಲಿ ಉಪಯೋಗಿಸುವ ವಿಧ್ಯುತ್ ಬಿಲ್ಲನ್ನು ಪ್ರತಿ ತಿಂಗಳು ವಿಧ್ಯುತ್ ಇಲಾಖೆಗೆ ಕಟ್ಟುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.",
+    "ಸದರಿ ಮನೆಯನ್ನು ವಾಯಿದೆಯನಂತರ ಬಾಡಿಗೆ ಮುಂದುವರೆದಲ್ಲಿ ಶೇಖಡ {{ESCALATION_RATE}} ಹೆಚ್ಚಿನ ಬಾಡಿಗೆ ಕೊಟ್ಟು ಹೊಸ ಕರಾರನ್ನು ಮಾಡಿಕೊಂಡು ಮುಂದುವರಿಯುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.",
+    "ಸದರಿ ಮನೆಯನ್ನು ನನ್ನ ವಾಸಕ್ಕೆ ಮಾತ್ರ ಉಪಯೋಗಿಸುವುದಾಗಿ ಮತ್ತು ನಾನು  ಯಾವುದೇ ಕಾರಣಕ್ಕೂ ಯಾರಿಗೂ ಒಳಬಾಡಿಗೆಗೆ, ಶಿಕ್ಮಿ ಬಾಡಿಗೆಗೆ ಕೊಡುವುದಿಲ್ಲವೆಂದು ಹಾಗೂ ಕಾನೂನು ಬಾಹಿರ ಚಟುವಟಿಕೆಗಳಿಗೆ ಗುರಿಪಡಿಸುದಿಲ್ಲವೆಂದು ಒಪ್ಪಿರುತ್ತೇನೆ.",
+    "ಸದರಿ  ಮನೆಯನ್ನು ಖಾಲೀ  ಮಾಡುವ ಅಥವಾ  ಖಾಲೀ  ಮಾಡಿಸುವ ಸಂದರ್ಭ ಬಂದಲ್ಲಿ ಪರಸ್ಪರ {{LEASE_PERIOD_NUM}} ತಿಂಗಳ ಅವಧಿ ಮುಂಚಿತ {{NOTICE_PERIOD_NUM}} ({{NOTICE_PERIOD}}) ತಿಂಗಳ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸತಕ್ಕದ್ದು.",
+    "ಸದರಿ  ಮನೆಯಲ್ಲಿ  ಯಾವುದೇ  ತಂಟೆ ತಕರಾರು ಬಂದಲ್ಲಿ ಮಾಲೀಕರಾದ ನೀವು ನಮ್ಮನ್ನು ಅವಧಿಯ ಮುಂಚಿತವಗಿ ಖಾಲಿ ಮಾಡಿಸುವುದಕ್ಕೆ ಸಂಪೂರ್ಣ ಜವಬ್ದಾರನಾಗಿರುತ್ತೀರಿ. ಹಾಗೂ ಈ ಕರಾರು ಪತ್ರದ ಅಸಲು ಪ್ರತಿಯಾಗಲೀ ನಕಲು ಪ್ರತಿಯಾಗಲೀ ಅಡಮಾನವಿಟ್ಟು ಸಾಲ ಪಡೆಯುವಂತಿಲ್ಲ.",
+    "ಸದರಿ ಮನೆಯನ್ನು ನಾನು ಬಾಡಿಗೆಗೆ ಪಡೆಯುವಾಗ ಯಾವ ಸ್ಥಿತಿಯಲ್ಲಿ ಪಡೆದಿರುತ್ತೇನೊ, ಅದೇ ರೀತಿ ನಾನು ಸಹ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸಿ ಹಿಂದಿರುಗಿಸುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ. ಡ್ಯಾಮೇಜುಗಳನ್ನು ಸರಿಪಡಿಸಿಕೊಡುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ, ಸದರಿ ಮನೆಗೆ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸುವ ವೆಚ್ದ ತಮ್ಮ ಬಳಿ ಇರುವ ಮುಂಗಡ ಹಣದಲ್ಲಿ ಮುಟ್ಟುಗೋಲು ಹಾಕಿಕೊಳ್ಳಲು ಒಪ್ಪಿರುತ್ತೇನೆ ಹಾಗೂ  ಸದರಿ ಕರಾರು ಪತ್ರದ  ಅಸಲು ಪ್ರತಿಯನ್ನು ಬಾಡಿಗೆದಾರರಾದ ನನ್ನ ವಶದಲ್ಲಿ ಮತ್ತು ನಕಲು ಪ್ರತಿಯನ್ನು ಮಾಲೀಕರಾದ ನಿಮ್ಮ ವಶದಲ್ಲಿ ಇಟ್ಟುಕೊಂಡಿರಲು ನಾನು ಒಪ್ಪಿ ತಮಗೂ ಒಪ್ಪಿಸಿ ಬರೆದುಕೊಟ್ಟ ವಾಸದ  ಮನೆ ಬಾಡಿಗೆ ಒಪ್ಪಂದದ  ಕರಾರು ಪತ್ರದ ಸಹಿ."
 ]
 
 app = FastAPI(title="Rental Agreement Generator Hub")
@@ -47,6 +83,134 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 
 # Security config
 security = HTTPBearer()
+
+# --- SMTP AND 2FA UTILITIES ---
+
+OTP_STORE = {} # format: {email: {"otp": str, "expires": float, "type": str, "data": dict}}
+
+def generate_otp() -> str:
+    return f"{random.randint(100000, 999999)}"
+
+def send_email(to_email: str, subject: str, html_body: str) -> bool:
+    smtp_host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    try:
+        smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    except ValueError:
+        smtp_port = 587
+    smtp_user = os.environ.get("SMTP_USER", "qryvanta.technologies@gmail.com")
+    smtp_pass = os.environ.get("SMTP_PASS", "ndparpwhmvkqxpab").replace(" ", "")
+
+    if not smtp_user or not smtp_pass:
+        print("SMTP credentials not configured. Email not sent.")
+        return False
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = smtp_user
+        msg['To'] = to_email
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(html_body, 'html'))
+
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.sendmail(smtp_user, to_email, msg.as_string())
+        server.quit()
+        print(f"Email sent successfully to {to_email}")
+        return True
+    except Exception as e:
+        print(f"Failed to send email to {to_email}: {e}")
+        return False
+
+def send_email_otp(to_email: str, otp: str, purpose: str) -> bool:
+    subject = f"Verification Code: {otp}"
+    html_body = f"""
+    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>Verify Your Email</h2>
+        <p>You requested a verification code for <strong>{purpose}</strong> on Rental Pro.</p>
+        <div style="font-size: 24px; font-weight: bold; background: #f3f4f6; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0; letter-spacing: 5px;">
+            {otp}
+        </div>
+        <p>This code is valid for 5 minutes. If you did not make this request, you can safely ignore this email.</p>
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #6b7280;">Sent by Rental Pro. Developed by Qryvanta Technologies.</p>
+    </div>
+    """
+    return send_email(to_email, subject, html_body)
+
+def send_registration_notifications(user_email: str, full_name: str):
+    welcome_subject = "Welcome to Rental Pro!"
+    welcome_body = f"""
+    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>Welcome to Rental Pro, {full_name}!</h2>
+        <p>Thank you for registering. Your account has been successfully created and verified.</p>
+        <p>You can now start generating and managing your rental agreements.</p>
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #6b7280;">Sent by Rental Pro. Developed by Qryvanta Technologies.</p>
+    </div>
+    """
+    threading.Thread(target=send_email, args=(user_email, welcome_subject, welcome_body), daemon=True).start()
+
+    admin_email = os.environ.get("SMTP_USER", "qryvanta.technologies@gmail.com")
+    admin_subject = f"New User Registered: {full_name}"
+    admin_body = f"""
+    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>New User Registration</h2>
+        <p>A new user has registered on Rental Pro:</p>
+        <ul>
+            <li><strong>Name:</strong> {full_name}</li>
+            <li><strong>Email:</strong> {user_email}</li>
+            <li><strong>Time:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</li>
+        </ul>
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #6b7280;">Sent by Rental Pro. Developed by Qryvanta Technologies.</p>
+    </div>
+    """
+    threading.Thread(target=send_email, args=(admin_email, admin_subject, admin_body), daemon=True).start()
+
+def create_notification_record(db: Session, user_id: int, title: str | None = None, desc: str | None = None, title_key: str | None = None, desc_key: str | None = None, params: str | None = None, background_tasks: BackgroundTasks = None):
+    notif = Notification(
+        user_id=user_id,
+        title=title,
+        desc=desc,
+        title_key=title_key,
+        desc_key=desc_key,
+        params=params
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(notif)
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if user and user.email:
+        subject = title or f"Notification Alert: {title_key or 'New Alert'}"
+        body = desc or f"You have a new notification on Rental Pro: {desc_key or ''}"
+        
+        email_body = f"""
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+            <h2>{subject}</h2>
+            <p>{body}</p>
+            <p><strong>Recipient:</strong> {user.full_name or user.email} ({user.email})</p>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #6b7280;">Sent by Rental Pro. Developed by Qryvanta Technologies.</p>
+        </div>
+        """
+        
+        if background_tasks:
+            background_tasks.add_task(send_email, user.email, f"Rental Pro - {subject}", email_body)
+        else:
+            threading.Thread(target=send_email, args=(user.email, f"Rental Pro - {subject}", email_body), daemon=True).start()
+            
+        admin_email = os.environ.get("SMTP_USER", "qryvanta.technologies@gmail.com")
+        if admin_email and user.email.lower() != admin_email.lower():
+            if background_tasks:
+                background_tasks.add_task(send_email, admin_email, f"[Admin CC] Rental Pro - {subject}", email_body)
+            else:
+                threading.Thread(target=send_email, args=(admin_email, f"[Admin CC] Rental Pro - {subject}", email_body), daemon=True).start()
+                
+    return notif
+
 
 # Auto Database creation & seeding
 @app.on_event("startup")
@@ -90,13 +254,19 @@ def startup_db_seed():
                 email="admin@rentalpro.com",
                 hashed_password=hash_password("admin123"),
                 full_name="Admin User",
-                master_conditions=json.dumps(DEFAULT_CONDITIONS)
+                master_conditions=json.dumps({
+                    "en": DEFAULT_CONDITIONS,
+                    "kn": DEFAULT_KANNADA_CONDITIONS
+                })
             )
             tenant_user = User(
                 email="tenant@rentalpro.com",
                 hashed_password=hash_password("tenant123"),
                 full_name="Tenant User",
-                master_conditions=json.dumps(DEFAULT_CONDITIONS)
+                master_conditions=json.dumps({
+                    "en": DEFAULT_CONDITIONS,
+                    "kn": DEFAULT_KANNADA_CONDITIONS
+                })
             )
             db.add(admin_user)
             db.add(tenant_user)
@@ -208,6 +378,8 @@ def startup_db_seed():
                     title_key="systemReady",
                     desc_key="systemReadyDesc"
                 )
+                db.add(n1)
+                db.add(n2)
         # Seed default tenants if they don't exist yet
         admin_user = db.query(User).filter(User.email == "admin@rentalpro.com").first()
         if admin_user:
@@ -598,37 +770,39 @@ FIELDS_METADATA = {
 
 # --- AUTH ENDPOINTS ---
 
+class UserVerifyOTP(BaseModel):
+    email: str
+    otp: str
+    type: str
+
+class UserResendOTP(BaseModel):
+    email: str
+    type: str
+
 @app.post("/api/auth/register")
 def register(payload: UserRegister, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="An account with this email already exists.")
     
-    new_user = User(
-        email=payload.email,
-        hashed_password=hash_password(payload.password),
-        full_name=payload.full_name,
-        master_conditions=json.dumps(DEFAULT_CONDITIONS)
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    # Seed default notifications for new user
-    n1 = Notification(user_id=new_user.id, title_key="verifyApproved", desc_key="aadharVerified")
-    n2 = Notification(user_id=new_user.id, title_key="systemReady", desc_key="systemReadyDesc")
-    db.add(n1)
-    db.add(n2)
-    db.commit()
-    
-    token = create_access_token({"sub": new_user.email})
-    return {
-        "token": token,
-        "user": {
-            "email": new_user.email,
-            "full_name": new_user.full_name
+    otp = generate_otp()
+    OTP_STORE[payload.email] = {
+        "otp": otp,
+        "expires": time.time() + 300, # 5 minutes
+        "type": "register",
+        "data": {
+            "password": payload.password,
+            "full_name": payload.full_name
         }
     }
+    
+    success = send_email_otp(payload.email, otp, "Registration")
+    if not success:
+        # We clean up the OTP session if email fails to send
+        OTP_STORE.pop(payload.email, None)
+        raise HTTPException(status_code=500, detail="Failed to send verification code. Please check SMTP settings.")
+        
+    return {"status": "2fa_required", "email": payload.email}
 
 @app.post("/api/auth/login")
 def login(payload: UserLogin, db: Session = Depends(get_db)):
@@ -645,27 +819,209 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         }
     }
 
+@app.post("/api/auth/verify-2fa")
+def verify_2fa(payload: UserVerifyOTP, db: Session = Depends(get_db)):
+    email = payload.email
+    entry = OTP_STORE.get(email)
+    
+    if not entry or entry["type"] != payload.type:
+        raise HTTPException(status_code=400, detail="No active verification session found for this email.")
+        
+    if time.time() > entry["expires"]:
+        OTP_STORE.pop(email, None)
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please try again.")
+        
+    if entry["otp"] != payload.otp:
+        raise HTTPException(status_code=400, detail="Invalid verification code.")
+        
+    # Correct OTP!
+    if entry["type"] == "register":
+        reg_data = entry["data"]
+        new_user = User(
+            email=email,
+            hashed_password=hash_password(reg_data["password"]),
+            full_name=reg_data["full_name"],
+            master_conditions=json.dumps({
+                "en": DEFAULT_CONDITIONS,
+                "kn": DEFAULT_KANNADA_CONDITIONS
+            })
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        # Seed default notifications for new user
+        create_notification_record(db, new_user.id, title_key="verifyApproved", desc_key="aadharVerified")
+        create_notification_record(db, new_user.id, title_key="systemReady", desc_key="systemReadyDesc")
+        
+        # Send notifications
+        send_registration_notifications(email, new_user.full_name)
+        
+        OTP_STORE.pop(email, None)
+        token = create_access_token({"sub": new_user.email})
+        return {
+            "token": token,
+            "user": {
+                "email": new_user.email,
+                "full_name": new_user.full_name
+            }
+        }
+        
+    elif entry["type"] == "login":
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found.")
+            
+        OTP_STORE.pop(email, None)
+        token = create_access_token({"sub": user.email})
+        return {
+            "token": token,
+            "user": {
+                "email": user.email,
+                "full_name": user.full_name
+            }
+        }
+
+@app.post("/api/auth/resend-2fa")
+def resend_2fa(payload: UserResendOTP, db: Session = Depends(get_db)):
+    email = payload.email
+    entry = OTP_STORE.get(email)
+    
+    if not entry or entry["type"] != payload.type:
+        raise HTTPException(status_code=400, detail="No active verification session. Please go back and try again.")
+        
+    otp = generate_otp()
+    entry["otp"] = otp
+    entry["expires"] = time.time() + 300 # refresh 5-minute timer
+    
+    success = send_email_otp(email, otp, "Registration" if entry["type"] == "register" else "Login Verification")
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to send verification code. Please check SMTP settings.")
+        
+    return {"status": "success", "message": "Verification code resent successfully."}
+
+
 @app.get("/api/auth/me")
 def get_me(user: User = Depends(get_current_user)):
     try:
         conds = json.loads(user.master_conditions) if user.master_conditions else DEFAULT_CONDITIONS
     except Exception:
         conds = DEFAULT_CONDITIONS
+        
+    if isinstance(conds, list):
+        conds = {
+            "en": conds,
+            "kn": DEFAULT_KANNADA_CONDITIONS
+        }
+    elif isinstance(conds, dict):
+        if "en" not in conds:
+            conds["en"] = DEFAULT_CONDITIONS
+        if "kn" not in conds:
+            conds["kn"] = DEFAULT_KANNADA_CONDITIONS
+
     return {
         "email": user.email,
         "full_name": user.full_name,
-        "master_conditions": conds,
+        "master_conditions": conds["en"],
+        "master_conditions_kn": conds["kn"],
         "output_dir": user.output_dir
     }
 
 class UpdateConditionsPayload(BaseModel):
     conditions: list[str]
+    conditions_kn: list[str] | None = None
 
 @app.put("/api/auth/conditions")
 def update_conditions(payload: UpdateConditionsPayload, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user.master_conditions = json.dumps(payload.conditions)
+    data = {
+        "en": payload.conditions,
+        "kn": payload.conditions_kn if payload.conditions_kn is not None else DEFAULT_KANNADA_CONDITIONS
+    }
+    user.master_conditions = json.dumps(data)
     db.commit()
-    return {"detail": "Conditions updated successfully.", "conditions": payload.conditions}
+    return {"detail": "Conditions updated successfully.", "conditions": payload.conditions, "conditions_kn": payload.conditions_kn}
+
+@app.get("/api/diagnostics/db-health")
+def get_db_health(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        # Check SQLite version and run simple query
+        from sqlalchemy import text
+        version = db.execute(text("SELECT sqlite_version()")).scalar()
+        
+        # Count rows in each table to ensure schemas are functional
+        user_count = db.query(User).count()
+        agreement_count = db.query(Agreement).count()
+        template_count = db.query(Template).count()
+        tenant_count = db.query(Tenant).count()
+        owner_count = db.query(Owner).count()
+        property_count = db.query(Property).count()
+        
+        # Get DB file size if available
+        db_file = "database.db"
+        db_size_kb = 0
+        if os.path.exists(db_file):
+            db_size_kb = os.path.getsize(db_file) // 1024
+
+        return {
+            "status": "healthy",
+            "sqlite_version": version,
+            "size_kb": db_size_kb,
+            "counts": {
+                "users": user_count,
+                "agreements": agreement_count,
+                "templates": template_count,
+                "tenants": tenant_count,
+                "owners": owner_count,
+                "properties": property_count
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database diagnostic failed: {str(e)}")
+
+@app.get("/api/diagnostics/run")
+def run_app_diagnostics(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        results = {}
+        
+        # 1. Check template file presence
+        results["template_exists"] = os.path.exists(TEMPLATE_PATH)
+        
+        # 2. Check output directory write permissions
+        output_dir = user.output_dir or OUTPUT_DIR
+        results["output_directory"] = output_dir
+        results["output_dir_writable"] = os.access(os.path.dirname(output_dir) if not os.path.exists(output_dir) else output_dir, os.W_OK)
+        
+        # 3. Check win32com MS Word connection capability (optional/warning on non-Windows/missing Word)
+        has_win32 = False
+        try:
+            import win32com.client
+            has_win32 = True
+        except ImportError:
+            pass
+        results["win32com_available"] = has_win32
+        
+        # 4. Check system memory/disk usage via standard os module (shutil)
+        import shutil
+        total, used, free = shutil.disk_usage(os.path.abspath("."))
+        results["disk"] = {
+            "total_gb": round(total / (2**30), 2),
+            "used_gb": round(used / (2**30), 2),
+            "free_gb": round(free / (2**30), 2),
+            "percent_used": round((used / total) * 100, 1)
+        }
+
+        # 5. Check if Nudi transliteration helper loads correctly
+        from kannada_helper import unicode_to_nudi
+        test_nudi = unicode_to_nudi("ನಮಸ್ಕಾರ")
+        results["kannada_nudi_support"] = test_nudi is not None
+
+        return {
+            "status": "success",
+            "timestamp": datetime.now().isoformat(),
+            "diagnostics": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"System diagnostics failed: {str(e)}")
 
 # --- USER SETTINGS ENDPOINTS ---
 
@@ -899,14 +1255,13 @@ def save_and_generate_agreement(
         db.refresh(agreement)
 
         # Add dynamic notification to DB
-        notif = Notification(
-            user_id=user.id,
+        create_notification_record(
+            db,
+            user.id,
             title_key="agreementSavedTitle",
             desc_key="agreementSavedDesc",
             params=json.dumps({"title": agreement.title})
         )
-        db.add(notif)
-        db.commit()
         
         return {
             "id": agreement.id,
@@ -935,13 +1290,7 @@ def delete_agreement(agreement_id: int, user: User = Depends(get_current_user), 
     db.commit()
 
     # Add deletion notification to DB
-    notif = Notification(
-        user_id=user.id,
-        title_key="agreementDeletedTitle",
-        desc_key="agreementDeletedDesc"
-    )
-    db.add(notif)
-    db.commit()
+    create_notification_record(db, user.id, title_key="agreementDeletedTitle", desc_key="agreementDeletedDesc")
 
     return {"detail": "Agreement deleted successfully."}
 
@@ -982,6 +1331,42 @@ def download_docx(agreement_id: int, token: str, db: Session = Depends(get_db)):
 
 @app.get("/api/notifications")
 def get_notifications(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        agreements = db.query(Agreement).filter(Agreement.user_id == user.id).all()
+        for ag in agreements:
+            try:
+                ag_data = json.loads(ag.agreement_data)
+                end_date_str = ag_data.get("LEASE_END_DATE")
+                if end_date_str:
+                    parsed_date = None
+                    for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
+                        try:
+                            parsed_date = datetime.strptime(end_date_str.strip(), fmt)
+                            break
+                        except ValueError:
+                            continue
+                    
+                    if parsed_date:
+                        days_remaining = (parsed_date - datetime.utcnow()).days
+                        if 0 <= days_remaining <= 30:
+                            notif_desc = f"The lease agreement '{ag.title}' is set to expire on {end_date_str} ({days_remaining} days remaining)."
+                            exists = db.query(Notification).filter(
+                                Notification.user_id == user.id,
+                                Notification.desc == notif_desc
+                            ).first()
+                            
+                            if not exists:
+                                create_notification_record(
+                                    db,
+                                    user.id,
+                                    title="Lease Expiring Soon",
+                                    desc=notif_desc
+                                )
+            except Exception as e:
+                print(f"Error parsing agreement end date for ID {ag.id}: {e}")
+    except Exception as e:
+        print(f"Error checking lease expirations: {e}")
+
     notifs = db.query(Notification).filter(Notification.user_id == user.id).order_by(Notification.created_at.desc()).all()
     result = []
     for n in notifs:
@@ -1006,18 +1391,17 @@ def delete_notification(notification_id: int, user: User = Depends(get_current_u
     return {"status": "success", "message": "Notification deleted successfully."}
 
 @app.post("/api/notifications")
-def create_notification(payload: CreateNotificationPayload, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    notif = Notification(
-        user_id=user.id,
+def create_notification(payload: CreateNotificationPayload, user: User = Depends(get_current_user), db: Session = Depends(get_db), background_tasks: BackgroundTasks = None):
+    notif = create_notification_record(
+        db,
+        user.id,
         title=payload.title,
         desc=payload.desc,
         title_key=payload.title_key,
         desc_key=payload.desc_key,
-        params=json.dumps(payload.params) if payload.params else None
+        params=json.dumps(payload.params) if payload.params else None,
+        background_tasks=background_tasks
     )
-    db.add(notif)
-    db.commit()
-    db.refresh(notif)
     return {
         "id": notif.id,
         "title": notif.title,
@@ -1027,23 +1411,6 @@ def create_notification(payload: CreateNotificationPayload, user: User = Depends
         "params": payload.params,
         "created_at": notif.created_at.isoformat()
     }
-
-
-# --- UPDATE ENDPOINTS ---
-
-@app.get("/api/update/check")
-def check_update(user: User = Depends(get_current_user)):
-    return {
-        "enabled": False,
-        "available": False,
-        "current": "1.0.0",
-        "latest": "1.0.0",
-        "notes": ""
-    }
-
-@app.post("/api/update/apply")
-def apply_update(user: User = Depends(get_current_user)):
-    raise HTTPException(status_code=400, detail="Auto-update works only in the installed desktop app.")
 
 
 # --- TEMPLATES ENDPOINTS ---
@@ -1183,15 +1550,12 @@ async def create_template(
     db.commit()
     db.refresh(new_template)
     
-    notif = Notification(
-        user_id=user.id,
+    create_notification_record(
+        db,
+        user.id,
         title="Custom Template Added",
-        desc=f"Template \"{title}\" has been successfully created and registered.",
-        title_key=None,
-        desc_key=None
+        desc=f"Template \"{title}\" has been successfully created and registered."
     )
-    db.add(notif)
-    db.commit()
 
     return {
         "id": new_template.id,
@@ -1253,13 +1617,12 @@ def create_tenant(payload: TenantCreate, user: User = Depends(get_current_user),
     db.refresh(t)
     
     # Save a notification
-    notif = Notification(
-        user_id=user.id,
+    create_notification_record(
+        db,
+        user.id,
         title="Tenant Registered",
         desc=f"Tenant \"{t.name}\" has been successfully added to your registry."
     )
-    db.add(notif)
-    db.commit()
     
     return {
         "id": t.id,
@@ -1347,13 +1710,12 @@ def create_owner(payload: OwnerCreate, user: User = Depends(get_current_user), d
     db.refresh(o)
     
     # Save a notification
-    notif = Notification(
-        user_id=user.id,
+    create_notification_record(
+        db,
+        user.id,
         title="Owner Registered",
         desc=f"Owner \"{o.name}\" has been successfully added to your registry."
     )
-    db.add(notif)
-    db.commit()
     
     return {
         "id": o.id,
@@ -1434,13 +1796,12 @@ def create_property(payload: PropertyCreate, user: User = Depends(get_current_us
     db.refresh(p)
     
     # Save a notification
-    notif = Notification(
-        user_id=user.id,
+    create_notification_record(
+        db,
+        user.id,
         title="Property Registered",
         desc=f"Property asset \"{p.name}\" has been successfully added to your registry."
     )
-    db.add(notif)
-    db.commit()
     
     return {
         "id": p.id,

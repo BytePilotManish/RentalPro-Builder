@@ -40,7 +40,15 @@ import {
   Maximize2,
   Keyboard,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Share2,
+  ExternalLink,
+  Copy,
+  Check,
+  Database,
+  Activity,
+  Terminal
 } from "lucide-react";
 
 // Number to words conversion (Indian Numbering System)
@@ -103,6 +111,18 @@ const DEFAULT_CONDITIONS = [
   "The TENANT should pay the Electricity and water charges utilized for his own use as per the actual meter reading for the rented premises during the period of tenancy.",
   "The tenancy period may be renewed for further period of {{LEASE_PERIOD_NUM}} months by mutual agreement between the OWNER and TENANT on the terms and conditions to be specified at that time.",
   "The OWNER and TENANT have agreed that {{NOTICE_PERIOD}} prior notice on either side is required for the termination of the tenancy period."
+];
+
+const DEFAULT_KANNADA_CONDITIONS = [
+  "ಸದರಿ ಮನೆಗೆ ಮುಂಗಡ (ಭದ್ರತಾ ಠೇವಣಿ) ಹಣವಾಗಿ ರೂ.{{DEPOSIT_AMOUNT}}/- ({{DEPOSIT_AMOUNT_WORDS}}) ರೂಪಾಯಿಗಳನ್ನು ನಿಮಗೆ ಈ ಕೆಳಕಂಡ ಸಾಕ್ಷಿದಾರರ ಸಮಕ್ಷಮ ನಗದು ರೂಪದಲ್ಲಿ ಪಾವತಿಮಾಡಿರುತ್ತೇನೆ.  ಸದರಿ ಮುಂಗಡ ಹಣಕ್ಕೆ ತಾವು ಯಾವುದೇ ರೀತಿಯ ಬಡ್ಡಿಯನ್ನು ಕೊಡಬೇಕಾಗಿಲ್ಲ ಮತ್ತು  ಸದರಿ ಹಣವನ್ನು  ಮನೆಯನ್ನು ಖಾಲೀ ಮಾಡಿ ನಿಮ್ಮ ಸ್ವಾಧೀನಕ್ಕೆ ಕೊಡುವಾಗ ಒಂದೇ ಕಂತಿನಲ್ಲಿ ಹಿಂದಿರುಗಿಸತಕ್ಕದ್ದು.",
+  "ಸದರಿ ಮನೆಗೆ ಬಾಡಿಗೆಯಾಗಿ ರೂ.{{RENT_AMOUNT}}/- ({{RENT_AMOUNT_WORDS}}) ರೂಪಾಯಿಗಳನ್ನು ನಿಗಧಿ ಮಾಡಿದ್ದು,  ಸದರಿ ಬಾಡಿಗೆಯನ್ನು ಪ್ರತಿ ಮಾಹೇ {{RENT_PAYMENT_DAY}} ನೇ ದಿನಾಂಕದ ಒಳಗೆ ತಪ್ಪದೇ ಪಾವತಿಮಾಡುತ್ತೇನೆ.",
+  "ಮೇಲ್ಕಂಡ ಸದರಿ ಮನೆಗೆ ದಿನಾಂಕ: {{LEASE_START_DATE}} ರಿಂದ {{LEASE_PERIOD_NUM}} ({{LEASE_PERIOD}}) ತಿಂಗಳು ಅವಧಿಯನ್ನು ಗೊತ್ತುಪಡಿಸಲಾಗಿರುತ್ತದೆ.",
+  "ಸದರಿ ಮನೆಯಲ್ಲಿ ಉಪಯೋಗಿಸುವ ವಿಧ್ಯುತ್ ಬಿಲ್ಲನ್ನು ಪ್ರತಿ ತಿಂಗಳು ವಿಧ್ಯುತ್ ಇಲಾಖೆಗೆ ಕಟ್ಟುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.",
+  "ಸದರಿ ಮನೆಯನ್ನು ವಾಯಿದೆಯನಂತರ ಬಾಡಿಗೆ ಮುಂದುವರೆದಲ್ಲಿ ಶೇಖಡ {{ESCALATION_RATE}} ಹೆಚ್ಚಿನ ಬಾಡಿಗೆ ಕೊಟ್ಟು ಹೊಸ ಕರಾರನ್ನು ಮಾಡಿಕೊಂಡು ಮುಂದುವರಿಯುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.",
+  "ಸದರಿ ಮನೆಯನ್ನು ನನ್ನ ವಾಸಕ್ಕೆ ಮಾತ್ರ ಉಪಯೋಗಿಸುವುದಾಗಿ ಮತ್ತು ನಾನು  ಯಾವುದೇ ಕಾರಣಕ್ಕೂ ಯಾರಿಗೂ ಒಳಬಾಡಿಗೆಗೆ, ಶಿಕ್ಮಿ ಬಾಡಿಗೆಗೆ ಕೊಡುವುದಿಲ್ಲವೆಂದು ಹಾಗೂ ಕಾನೂನು ಬಾಹಿರ ಚಟುವಟಿಕೆಗಳಿಗೆ ಗುರಿಪಡಿಸುದಿಲ್ಲವೆಂದು ಒಪ್ಪಿರುತ್ತೇನೆ.",
+  "ಸದರಿ  ಮನೆಯನ್ನು ಖಾಲೀ  ಮಾಡುವ ಅಥವಾ  ಖಾಲೀ  ಮಾಡಿಸುವ ಸಂದರ್ಭ ಬಂದಲ್ಲಿ ಪರಸ್ಪರ {{LEASE_PERIOD_NUM}} ತಿಂಗಳ ಅವಧಿ ಮುಂಚಿತ {{NOTICE_PERIOD_NUM}} ({{NOTICE_PERIOD}}) ತಿಂಗಳ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸತಕ್ಕದ್ದು.",
+  "ಸದರಿ  ಮನೆಯಲ್ಲಿ  ಯಾವುದೇ  ತಂಟೆ ತಕರಾರು ಬಂದಲ್ಲಿ ಮಾಲೀಕರಾದ ನೀವು ನಮ್ಮನ್ನು ಅವಧಿಯ ಮುಂಚಿತವಗಿ ಖಾಲಿ ಮಾಡಿಸುವುದಕ್ಕೆ ಸಂಪೂರ್ಣ ಜವಬ್ದಾರನಾಗಿರುತ್ತೀರಿ. ಹಾಗೂ ಈ ಕರಾರು ಪತ್ರದ ಅಸಲು ಪ್ರತಿಯಾಗಲೀ ನಕಲು ಪ್ರತಿಯಾಗಲೀ ಅಡಮಾನವಿಟ್ಟು ಸಾಲ ಪಡೆಯುವಂತಿಲ್ಲ.",
+  "ಸದರಿ ಮನೆಯನ್ನು ನಾನು ಬಾಡಿಗೆಗೆ ಪಡೆಯುವಾಗ ಯಾವ ಸ್ಥಿತಿಯಲ್ಲಿ ಪಡೆದಿರುತ್ತೇನೊ, ಅದೇ ರೀತಿ ನಾನು ಸಹ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸಿ ಹಿಂದಿರುಗಿಸುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ. ಡ್ಯಾಮೇಜುಗಳನ್ನು ಸರಿಪಡಿಸಿಕೊಡುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ, ಸದರಿ ಮನೆಗೆ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸುವ ವೆಚ್ದ ತಮ್ಮ ಬಳಿ ಇರುವ ಮುಂಗಡ ಹಣದಲ್ಲಿ ಮುಟ್ಟುಗೋಲು ಹಾಕಿಕೊಳ್ಳಲು ಒಪ್ಪಿರುತ್ತೇನೆ ಹಾಗೂ  ಸದರಿ ಕರಾರು ಪತ್ರದ  ಅಸಲು ಪ್ರತಿಯನ್ನು ಬಾಡಿಗೆದಾರರಾದ ನನ್ನ ವಶದಲ್ಲಿ ಮತ್ತು ನಕಲು ಪ್ರತಿಯನ್ನು ಮಾಲೀಕರಾದ ನಿಮ್ಮ ವಶದಲ್ಲಿ ಇಟ್ಟುಕೊಂಡಿರಲು ನಾನು ಒಪ್ಪಿ ತಮಗೂ ಒಪ್ಪಿಸಿ ಬರೆದುಕೊಟ್ಟ ವಾಸದ  ಮನೆ ಬಾಡಿಗೆ ಒಪ್ಪಂದದ  ಕರಾರು ಪತ್ರದ ಸಹಿ."
 ];
 
 const UI_TRANSLATIONS = {
@@ -372,11 +392,22 @@ export default function App() {
   const [fullscreenMode, setFullscreenMode] = useState("none"); // "none", "split", "document"
   const [showFilenameModal, setShowFilenameModal] = useState(false);
   const [filenameInput, setFilenameInput] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [masterConditionsKn, setMasterConditionsKn] = useState(() => {
+    const saved = localStorage.getItem("master_conditions_kn");
+    if (saved) return JSON.parse(saved);
+    return DEFAULT_KANNADA_CONDITIONS;
+  });
+  const [conditionsActiveLang, setConditionsActiveLang] = useState("en"); // "en", "kn"
   // Admin-only document creation charge (earning for preparing this document)
   const [feeInput, setFeeInput] = useState("");
   const [showConditionsSidebar, setShowConditionsSidebar] = useState(false);
   const [clauseSearchQuery, setClauseSearchQuery] = useState("");
-  const [kannadaKeyboardActive, setKannadaKeyboardActive] = useState(true);
+  const [kannadaKeyboardActive, setKannadaKeyboardActive] = useState(() => {
+    const saved = localStorage.getItem("kannadaKeyboardActive");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const [settingsFullName, setSettingsFullName] = useState("");
   const [settingsPassword, setSettingsPassword] = useState("");
 
@@ -427,6 +458,123 @@ export default function App() {
     }
   }, [fieldsConfig]);
 
+  useEffect(() => {
+    localStorage.setItem("kannadaKeyboardActive", JSON.stringify(kannadaKeyboardActive));
+  }, [kannadaKeyboardActive]);
+
+  useEffect(() => {
+    if (!kannadaKeyboardActive) return;
+
+    const handleGlobalKeyDown = (e) => {
+      // 1. Check if single letter key was pressed
+      const key = e.key;
+      if (key.length !== 1 || !/^[a-zA-Z]$/.test(key)) return;
+
+      // 2. Check active element
+      const input = document.activeElement;
+      if (!input) return;
+
+      const isInput = input.tagName === "INPUT" && 
+                      ["text", "search", "url", "tel"].includes(input.type || "text");
+      const isTextarea = input.tagName === "TEXTAREA";
+
+      if (!isInput && !isTextarea) return;
+      if (input.readOnly || input.disabled) return;
+
+      // 3. Prevent browser default and stop propagation to avoid local conflict
+      e.preventDefault();
+      e.stopPropagation();
+
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const val = input.value || "";
+
+      const prevChar = start > 0 ? val.charAt(start - 1) : "";
+      let replaceCount = 0;
+      let insertText = "";
+
+      if (prevChar === "್") {
+        const prevPrevChar = start > 1 ? val.charAt(start - 2) : "";
+        const base = prevPrevChar + prevChar;
+
+        if (base === "ಕ್" && key === "h") { replaceCount = 2; insertText = "ಖ್"; }
+        else if (base === "ಗ್" && key === "h") { replaceCount = 2; insertText = "ಘ್"; }
+        else if (base === "ಚ್" && key === "h") { replaceCount = 2; insertText = "ಛ್"; }
+        else if (base === "ಜ್" && key === "h") { replaceCount = 2; insertText = "ಝ್"; }
+        else if (base === "ಟ್" && key === "h") { replaceCount = 2; insertText = "ಠ್"; }
+        else if (base === "ಡ್" && key === "h") { replaceCount = 2; insertText = "ಢ್"; }
+        else if (base === "ತ್" && key === "h") { replaceCount = 2; insertText = "ಥ್"; }
+        else if (base === "ದ್" && key === "h") { replaceCount = 2; insertText = "ಧ್"; }
+        else if (base === "ಪ್" && key === "h") { replaceCount = 2; insertText = "ಫ್"; }
+        else if (base === "ಬ್" && key === "h") { replaceCount = 2; insertText = "ಭ್"; }
+        else if (base === "ಸ್" && key === "h") { replaceCount = 2; insertText = "ಶ್"; }
+        else if (base === "ಶ್" && key === "h") { replaceCount = 2; insertText = "ಷ್"; }
+        else if (base === "ಲ್" && key === "h") { replaceCount = 2; insertText = "ಳ್"; }
+        else if (base === "ನ್" && key === "h") { replaceCount = 2; insertText = "ಣ್"; }
+        else if (key === "a") { replaceCount = 1; insertText = ""; }
+        else if (key === "i") { replaceCount = 1; insertText = "ಿ"; }
+        else if (key === "u") { replaceCount = 1; insertText = "ು"; }
+        else if (key === "e") { replaceCount = 1; insertText = "ೆ"; }
+        else if (key === "o") { replaceCount = 1; insertText = "ೊ"; }
+        else if (key === "R") { replaceCount = 1; insertText = "ೃ"; }
+      }
+      else if (prevChar === "ಅ" && key === "a") { replaceCount = 1; insertText = "ಆ"; }
+      else if (prevChar === "ಇ" && key === "i") { replaceCount = 1; insertText = "ಈ"; }
+      else if (prevChar === "ಉ" && key === "u") { replaceCount = 1; insertText = "ಊ"; }
+      else if (prevChar === "ಎ" && key === "e") { replaceCount = 1; insertText = "ಏ"; }
+      else if (prevChar === "ಒ" && key === "o") { replaceCount = 1; insertText = "ಓ"; }
+      else if (prevChar === "ಿ" && key === "i") { replaceCount = 1; insertText = "ೀ"; }
+      else if (prevChar === "ು" && key === "u") { replaceCount = 1; insertText = "ೂ"; }
+      else if (prevChar === "ೆ" && key === "e") { replaceCount = 1; insertText = "ೇ"; }
+      else if (prevChar === "ೊ" && key === "o") { replaceCount = 1; insertText = "ೋ"; }
+      else if (prevChar === "ೇ" && key === "e") { replaceCount = 1; insertText = "ೈ"; }
+      else if (/[ಕ-ಹಳ]/.test(prevChar) && key === "a") { replaceCount = 0; insertText = "ಾ"; }
+      else if (prevChar === "ಾ" && key === "a") { replaceCount = 1; insertText = "ಾ"; }
+      else if (key === "M") { replaceCount = 0; insertText = "ಂ"; }
+      else if (key === "H") { replaceCount = 0; insertText = "ಃ"; }
+      else if (key === "a") { replaceCount = 0; insertText = "ಅ"; }
+      else if (key === "i") { replaceCount = 0; insertText = "ಇ"; }
+      else if (key === "u") { replaceCount = 0; insertText = "ಉ"; }
+      else if (key === "e") { replaceCount = 0; insertText = "ಎ"; }
+      else if (key === "o") { replaceCount = 0; insertText = "ಒ"; }
+      else if (key === "R") { replaceCount = 0; insertText = "ಋ"; }
+      else {
+        const basicConsonants = {
+          'k': 'ಕ್', 'g': 'ಗ್', 'c': 'ಚ್', 'j': 'ಜ್', 'T': 'ಟ್', 'D': 'ಡ್', 'N': 'ಣ್',
+          't': 'ತ್', 'd': 'ದ್', 'n': 'ನ್', 'p': 'ಪ್', 'f': 'ಫ್', 'b': 'ಬ್', 'm': 'ಮ್',
+          'y': 'ಯ್', 'r': 'ರ್', 'l': 'ಲ್', 'v': 'ವ್', 'w': 'ವ್', 's': 'ಸ್', 'h': 'ಹ್',
+          'L': 'ಳ್'
+        };
+        if (basicConsonants[key]) {
+          replaceCount = 0;
+          insertText = basicConsonants[key];
+        } else {
+          replaceCount = 0;
+          insertText = key;
+        }
+      }
+
+      const newVal = val.substring(0, start - replaceCount) + insertText + val.substring(end);
+
+      // Programmatically trigger React onChange binding
+      const prototype = isInput ? window.HTMLInputElement.prototype : window.HTMLTextAreaElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+      if (setter) {
+        setter.call(input, newVal);
+        const inputEvent = new Event("input", { bubbles: true });
+        input.dispatchEvent(inputEvent);
+      }
+
+      const newCursorPos = start - replaceCount + insertText.length;
+      input.setSelectionRange(newCursorPos, newCursorPos);
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown, true);
+    };
+  }, [kannadaKeyboardActive]);
+
   // Toast notification state
   const [toast, setToast] = useState({ show: false, message: "", type: "info" });
 
@@ -436,6 +584,12 @@ export default function App() {
   const [regName, setRegName] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+
+  // Two-Factor Authentication (2FA) states
+  const [otpInput, setOtpInput] = useState("");
+  const [otpPurpose, setOtpPurpose] = useState(""); // "login" or "register"
+  const [otpEmail, setOtpEmail] = useState("");
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
 
   // Dashboard view options
   const [portfolioFilter, setPortfolioFilter] = useState("all"); // "all", "active", "expiring", "draft"
@@ -870,24 +1024,7 @@ export default function App() {
     setTheme(prev => (prev === "dark" ? "light" : "dark"));
   };
 
-  const updateMasterConditionsState = async (newConditions) => {
-    setMasterConditions(newConditions);
-    localStorage.setItem("master_conditions", JSON.stringify(newConditions));
-    if (authToken) {
-      try {
-        await fetch("/api/auth/conditions", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${authToken}`
-          },
-          body: JSON.stringify({ conditions: newConditions })
-        });
-      } catch (err) {
-        console.error("Failed to sync master conditions to DB:", err);
-      }
-    }
-  };
+
 
   // English to Kannada Transliteration Keyboard helpers
   const transliterateWord = (word) => {
@@ -1050,6 +1187,92 @@ export default function App() {
     }, 0);
   };
 
+  const handleGeneralKannadaInput = (e, getValue, setValue) => {
+    if (!kannadaKeyboardActive) return;
+    const key = e.key;
+    if (key.length !== 1 || !/^[a-zA-Z]$/.test(key)) return;
+
+    e.preventDefault();
+    const input = e.target;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const val = getValue() || "";
+
+    const prevChar = start > 0 ? val.charAt(start - 1) : "";
+    let replaceCount = 0;
+    let insertText = "";
+
+    if (prevChar === "್") {
+      const prevPrevChar = start > 1 ? val.charAt(start - 2) : "";
+      const base = prevPrevChar + prevChar;
+
+      if (base === "ಕ್" && key === "h") { replaceCount = 2; insertText = "ಖ್"; }
+      else if (base === "ಗ್" && key === "h") { replaceCount = 2; insertText = "ಘ್"; }
+      else if (base === "ಚ್" && key === "h") { replaceCount = 2; insertText = "ಛ್"; }
+      else if (base === "ಜ್" && key === "h") { replaceCount = 2; insertText = "ಝ್"; }
+      else if (base === "ಟ್" && key === "h") { replaceCount = 2; insertText = "ಠ್"; }
+      else if (base === "ಡ್" && key === "h") { replaceCount = 2; insertText = "ಢ್"; }
+      else if (base === "ತ್" && key === "h") { replaceCount = 2; insertText = "ಥ್"; }
+      else if (base === "ದ್" && key === "h") { replaceCount = 2; insertText = "ಧ್"; }
+      else if (base === "ಪ್" && key === "h") { replaceCount = 2; insertText = "ಫ್"; }
+      else if (base === "ಬ್" && key === "h") { replaceCount = 2; insertText = "ಭ್"; }
+      else if (base === "ಸ್" && key === "h") { replaceCount = 2; insertText = "ಶ್"; }
+      else if (base === "ಶ್" && key === "h") { replaceCount = 2; insertText = "ಷ್"; }
+      else if (base === "ಲ್" && key === "h") { replaceCount = 2; insertText = "ಳ್"; }
+      else if (base === "ನ್" && key === "h") { replaceCount = 2; insertText = "ಣ್"; }
+      else if (key === "a") { replaceCount = 1; insertText = ""; }
+      else if (key === "i") { replaceCount = 1; insertText = "ಿ"; }
+      else if (key === "u") { replaceCount = 1; insertText = "ು"; }
+      else if (key === "e") { replaceCount = 1; insertText = "ೆ"; }
+      else if (key === "o") { replaceCount = 1; insertText = "ೊ"; }
+      else if (key === "R") { replaceCount = 1; insertText = "ೃ"; }
+    }
+    else if (prevChar === "ಅ" && key === "a") { replaceCount = 1; insertText = "ಆ"; }
+    else if (prevChar === "ಇ" && key === "i") { replaceCount = 1; insertText = "ಇ"; }
+    else if (prevChar === "ಉ" && key === "u") { replaceCount = 1; insertText = "ಊ"; }
+    else if (prevChar === "ಎ" && key === "e") { replaceCount = 1; insertText = "ಏ"; }
+    else if (prevChar === "ಒ" && key === "o") { replaceCount = 1; insertText = "ಓ"; }
+    else if (prevChar === "ಿ" && key === "i") { replaceCount = 1; insertText = "ೀ"; }
+    else if (prevChar === "ು" && key === "u") { replaceCount = 1; insertText = "ೂ"; }
+    else if (prevChar === "ೆ" && key === "e") { replaceCount = 1; insertText = "ೇ"; }
+    else if (prevChar === "ೊ" && key === "o") { replaceCount = 1; insertText = "ೋ"; }
+    else if (prevChar === "ೇ" && key === "e") { replaceCount = 1; insertText = "ೈ"; }
+    else if (/[ಕ-ಹಳ]/.test(prevChar) && key === "a") { replaceCount = 0; insertText = "ಾ"; }
+    else if (prevChar === "ಾ" && key === "a") { replaceCount = 1; insertText = "ಾ"; }
+    else if (key === "M") { replaceCount = 0; insertText = "ಂ"; }
+    else if (key === "H") { replaceCount = 0; insertText = "ಃ"; }
+    else if (key === "a") { replaceCount = 0; insertText = "ಅ"; }
+    else if (key === "i") { replaceCount = 0; insertText = "ಇ"; }
+    else if (key === "u") { replaceCount = 0; insertText = "ಉ"; }
+    else if (key === "e") { replaceCount = 0; insertText = "ಎ"; }
+    else if (key === "o") { replaceCount = 0; insertText = "ಒ"; }
+    else if (key === "R") { replaceCount = 0; insertText = "ಋ"; }
+    else {
+      const basicConsonants = {
+        'k': 'ಕ್', 'g': 'ಗ್', 'c': 'ಚ್', 'j': 'ಜ್', 'T': 'ಟ್', 'D': 'ಡ್', 'N': 'ಣ್',
+        't': 'ತ್', 'd': 'ದ್', 'n': 'ನ್', 'p': 'ಪ್', 'f': 'ಫ್', 'b': 'ಬ್', 'm': 'ಮ್',
+        'y': 'ಯ್', 'r': 'ರ್', 'l': 'ಲ್', 'v': 'ವ್', 'w': 'ವ್', 's': 'ಸ್', 'h': 'ಹ್',
+        'L': 'ಳ್'
+      };
+      if (basicConsonants[key]) {
+        replaceCount = 0;
+        insertText = basicConsonants[key];
+      } else {
+        replaceCount = 0;
+        insertText = key;
+      }
+    }
+
+    const newVal = val.substring(0, start - replaceCount) + insertText + val.substring(end);
+    setValue(newVal);
+
+    const newCursorPos = start - replaceCount + insertText.length;
+    setTimeout(() => {
+      input.selectionStart = newCursorPos;
+      input.selectionEnd = newCursorPos;
+    }, 0);
+  };
+
   const activeFieldsConfig = useMemo(() => {
     if (!fieldsConfig) return null;
     if (selectedTemplateId === -1) {
@@ -1092,6 +1315,10 @@ export default function App() {
       if (data.master_conditions) {
         setMasterConditions(data.master_conditions);
         localStorage.setItem("master_conditions", JSON.stringify(data.master_conditions));
+      }
+      if (data.master_conditions_kn) {
+        setMasterConditionsKn(data.master_conditions_kn);
+        localStorage.setItem("master_conditions_kn", JSON.stringify(data.master_conditions_kn));
       }
     } catch (err) {
       showToast(err.message, "error");
@@ -1159,7 +1386,7 @@ export default function App() {
         const data = await res.json();
         throw new Error(data.detail || "Update failed to start.");
       }
-      showToast("Downloading update… the app will restart automatically.", "success");
+      showToast("Downloading update… the app will close and reopen automatically in ~30 seconds.", "success");
     } catch (err) {
       showToast(err.message, "error");
       setApplyingUpdate(false);
@@ -1254,11 +1481,71 @@ export default function App() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed.");
 
+      if (data.status === "2fa_required") {
+        setOtpPurpose("register");
+        setOtpEmail(regEmail);
+        setOtpInput("");
+        setCurrentView("otp_verify");
+        showToast("Verification code sent to your email.", "info");
+      } else {
+        setAuthToken(data.token);
+        showToast("Account registered successfully!", "success");
+        setRegName("");
+        setRegEmail("");
+        setRegPassword("");
+      }
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  };
+
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    if (isOtpLoading) return;
+    setIsOtpLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: otpEmail, otp: otpInput, type: otpPurpose })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Invalid or expired OTP code.");
+
       setAuthToken(data.token);
-      showToast("Account registered successfully!", "success");
+      showToast(
+        otpPurpose === "register" 
+          ? "Account registered and verified successfully!" 
+          : `Welcome back, ${data.user.full_name}!`,
+        "success"
+      );
+      setLoginEmail("");
+      setLoginPassword("");
       setRegName("");
       setRegEmail("");
       setRegPassword("");
+      setOtpInput("");
+      setOtpEmail("");
+      setOtpPurpose("");
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const res = await fetch("/api/auth/resend-2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: otpEmail, type: otpPurpose })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to resend code.");
+      showToast("A new verification code has been sent to your email.", "success");
+      setOtpInput("");
     } catch (err) {
       showToast(err.message, "error");
     }
@@ -1350,8 +1637,8 @@ export default function App() {
     setActivePreviewTab("draft");
     setPdfGenerated(false);
 
-    const initialConditions = masterConditions.map((masterText, idx) => ({
-      id: `master-${idx}-${Date.now()}`,
+    const initialConditions = masterConditionsKn.map((masterText, idx) => ({
+      id: `masterKn-${idx}-${Date.now()}`,
       text: masterText,
       checked: true
     }));
@@ -1434,7 +1721,7 @@ export default function App() {
         }
       });
     } else {
-      setSelectedTemplateId(null);
+      setSelectedTemplateId(agreement.template_id || null);
       fetchFieldsConfig();
 
       // Populate agreementConditions
@@ -1449,11 +1736,14 @@ export default function App() {
         });
       });
 
-      masterConditions.forEach((masterText, idx) => {
+      const refMasterConditions = agreement.template_id === -1 ? masterConditionsKn : masterConditions;
+      const idPrefix = agreement.template_id === -1 ? "masterKn" : "master";
+
+      refMasterConditions.forEach((masterText, idx) => {
         const isAlreadySaved = savedClauses.some(savedText => savedText === masterText);
         if (!isAlreadySaved) {
           localConditions.push({
-            id: `master-${idx}-${Date.now()}`,
+            id: `${idPrefix}-${idx}-${Date.now()}`,
             text: masterText,
             checked: false
           });
@@ -1639,6 +1929,80 @@ export default function App() {
         printWindow.onload = () => printWindow.print();
       } else {
         showToast("Pop-up blocked. Please enable popups or download PDF to print.", "error");
+      }
+    }
+  };
+
+  const handleShareWhatsApp = async () => {
+    try {
+      if (navigator.canShare && navigator.share && downloadUrls.pdf) {
+        const response = await fetch(downloadUrls.pdf);
+        const blob = await response.blob();
+        const file = new File([blob], `${editorTitle}.pdf`, { type: "application/pdf" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: editorTitle,
+            text: `Rental Agreement PDF for ${editorTitle}`,
+          });
+          showToast("Agreement shared successfully!", "success");
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Native share failed:", err);
+    }
+    setShowShareModal(true);
+  };
+
+  const handleCopyShareLink = () => {
+    const fullPdfUrl = `${window.location.origin}${downloadUrls.pdf}`;
+    navigator.clipboard.writeText(fullPdfUrl);
+    setCopiedLink(true);
+    showToast("Share link copied to clipboard!", "success");
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const updateMasterConditionsState = async (newConditions) => {
+    setMasterConditions(newConditions);
+    localStorage.setItem("master_conditions", JSON.stringify(newConditions));
+    if (authToken) {
+      try {
+        await fetch("/api/auth/conditions", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ 
+            conditions: newConditions,
+            conditions_kn: masterConditionsKn 
+          })
+        });
+      } catch (err) {
+        console.error("Failed to sync master conditions to DB:", err);
+      }
+    }
+  };
+
+  const updateMasterConditionsKnState = async (newConditionsKn) => {
+    setMasterConditionsKn(newConditionsKn);
+    localStorage.setItem("master_conditions_kn", JSON.stringify(newConditionsKn));
+    if (authToken) {
+      try {
+        await fetch("/api/auth/conditions", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ 
+            conditions: masterConditions,
+            conditions_kn: newConditionsKn 
+          })
+        });
+      } catch (err) {
+        console.error("Failed to sync master conditions to DB:", err);
       }
     }
   };
@@ -1861,8 +2225,8 @@ export default function App() {
                     <div className="space-y-1">
                       <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Email Support</span>
                       <div>
-                        <a href="mailto:manishrahul2003@gmail.com" className="text-sm font-bold text-white hover:text-emerald-400 transition-colors truncate block">
-                          manishrahul2003@gmail.com
+                        <a href="mailto:qryvanta.technologies@gmail.com" className="text-sm font-bold text-white hover:text-emerald-400 transition-colors truncate block">
+                          qryvanta.technologies@gmail.com
                         </a>
                       </div>
                     </div>
@@ -2044,6 +2408,72 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* View router: OTP Verification */}
+      {currentView === "otp_verify" && (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 transition-colors duration-250 w-full overflow-hidden relative">
+          {/* Background blurs for dark/light */}
+          <div className="absolute top-[20%] right-[20%] w-[350px] h-[350px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-[90px] pointer-events-none z-0" />
+          <div className="absolute bottom-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/5 dark:bg-emerald-500/5 blur-[80px] pointer-events-none z-0" />
+
+          <div className="bg-white border border-slate-200 dark:bg-slate-900/60 dark:border-slate-800/80 backdrop-blur-xl p-8 rounded-3xl w-full max-w-md shadow-xl dark:shadow-2xl space-y-6 relative z-10 transition-all">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 dark:bg-emerald-500/15 dark:border-emerald-500/30 rounded-2xl">
+                <ShieldCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-500" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Two-Factor Verification</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                A 6-digit verification code has been sent to: <br />
+                <span className="font-bold text-slate-700 dark:text-slate-300">{otpEmail}</span>
+              </p>
+            </div>
+
+            <form onSubmit={handleOtpVerify} className="space-y-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider justify-center">
+                  Enter OTP Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-slate-800 rounded-xl px-4 py-3.5 outline-none transition-all dark:bg-slate-950/60 dark:border-slate-800 dark:focus:bg-slate-950/60 dark:text-slate-200 text-center text-2xl font-mono tracking-[0.5em] indent-[0.25em]"
+                  placeholder="000000"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={otpInput.length !== 6 || isOtpLoading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 dark:text-slate-950 font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all cursor-pointer text-center text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {isOtpLoading ? "Verifying..." : "Verify & Continue"}
+              </button>
+            </form>
+
+            <div className="flex flex-col gap-3 items-center border-t border-slate-100 dark:border-slate-800 pt-4">
+              <button
+                onClick={handleResendOtp}
+                className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+              >
+                Resend Code
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentView(otpPurpose === "register" ? "register" : "login");
+                  setOtpInput("");
+                  setOtpEmail("");
+                  setOtpPurpose("");
+                }}
+                className="text-xs text-slate-400 hover:text-slate-500 hover:underline font-medium"
+              >
+                Back to {otpPurpose === "register" ? "Sign Up" : "Log In"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* View router: Dashboard */}
       {currentView === "dashboard" && (
         <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-250">
@@ -2157,9 +2587,29 @@ export default function App() {
                     showToast(`Language switched to ${nextLang === "EN" ? "English" : "Kannada (ಕನ್ನಡ)"}`, "success");
                   }}
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200/60 shadow-sm hover:border-slate-300 dark:bg-slate-900/40 dark:border-slate-800 text-xs font-bold text-slate-600 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white active:scale-95 transition-all cursor-pointer"
+                  translate="no"
                 >
                   <Globe className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{language === "EN" ? "EN" : "KN"}</span>
+                  <span>{language === "EN" ? "English" : "ಕನ್ನಡ"}</span>
+                </button>
+
+                {/* Kannada Keyboard Toggle Pill */}
+                <button
+                  onClick={() => {
+                    const nextState = !kannadaKeyboardActive;
+                    setKannadaKeyboardActive(nextState);
+                    showToast(`Kannada Keyboard ${nextState ? "Enabled" : "Disabled"}`, "info");
+                  }}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border shadow-sm transition-all active:scale-95 cursor-pointer text-xs font-bold ${
+                    kannadaKeyboardActive
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400"
+                      : "bg-white border-slate-200/60 text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-450 dark:hover:text-white"
+                  }`}
+                  title="Toggle Kannada Phonetic Keyboard (Nudi)"
+                  translate="no"
+                >
+                  <Keyboard className={`w-3.5 h-3.5 ${kannadaKeyboardActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
+                  <span>{kannadaKeyboardActive ? "Keyboard: ON" : "Keyboard: OFF"}</span>
                 </button>
 
                 {/* Notifications Bell */}
@@ -2553,10 +3003,69 @@ export default function App() {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("masterClauseSub")}</p>
                   </div>
 
+                  {/* Language Selector Sub-tabs */}
+                  <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl max-w-xs border border-slate-200 dark:border-slate-800 mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setConditionsActiveLang("en")}
+                      className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition-all cursor-pointer ${
+                        conditionsActiveLang === "en"
+                          ? "bg-[#0f9770] text-white shadow"
+                          : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      English Clauses
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConditionsActiveLang("kn")}
+                      className={`flex-1 text-xs font-bold py-2.5 rounded-lg transition-all cursor-pointer ${
+                        conditionsActiveLang === "kn"
+                          ? "bg-[#0f9770] text-white shadow"
+                          : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      Kannada Clauses
+                    </button>
+                  </div>
+
+                  {conditionsActiveLang === "kn" && (
+                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 space-y-3 dark:bg-emerald-500/5 dark:border-emerald-500/10 max-w-xl">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <Keyboard className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">ಕನ್ನಡ ಕೀಬೋರ್ಡ್ (Nudi Phonetic)</span>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={kannadaKeyboardActive}
+                            onChange={(e) => setKannadaKeyboardActive(e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-9 h-5 bg-slate-200 rounded-full peer dark:bg-slate-800 peer-focus:ring-2 peer-focus:ring-emerald-500/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:height-4 after:width-4 after:transition-all dark:after:bg-slate-400 dark:after:border-slate-600 peer-checked:bg-emerald-600"></div>
+                        </label>
+                      </div>
+                      {kannadaKeyboardActive && (
+                        <div className="bg-white border border-slate-150 rounded-xl p-3 text-[10px] text-slate-500 dark:bg-slate-950/40 dark:border-slate-800/80 dark:text-slate-400 space-y-1.5 leading-relaxed">
+                          <div className="font-extrabold text-slate-650 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800/60 pb-1 mb-1 uppercase tracking-wider">Type phonetic keys (Legend):</div>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">a, aa, i, ii</span> &rarr; ಅ, ಆ, ಇ, ಈ</div>
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">u, uu, e, ee</span> &rarr; ಉ, ಊ, ಎ, ಏ</div>
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">k, kh, g, gh</span> &rarr; ಕ, ಖ, ಗ, ಘ</div>
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">t, th, d, dh</span> &rarr; ತ, ಥ, ದ, ಧ</div>
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">M, H, ru, R</span> &rarr; ಂ, ಃ, ೃ, ಋ</div>
+                            <div><span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">s, sh, Sh, L</span> &rarr; ಸ, ಶ, ಷ, ಳ</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-805 space-y-6">
                     <div className="space-y-4">
-                      {masterConditions.map((condition, index) => (
-                        <div key={index} className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-2xl group transition-all">
+                      {(conditionsActiveLang === "en" ? masterConditions : masterConditionsKn).map((condition, index) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800 rounded-2xl group transition-all text-left">
                           <span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
                             {index + 1}
                           </span>
@@ -2564,10 +3073,29 @@ export default function App() {
                           <div className="flex-grow">
                             <textarea
                               value={condition}
+                              onKeyDown={(e) => {
+                                if (conditionsActiveLang === "kn") {
+                                  handleGeneralKannadaInput(
+                                    e,
+                                    () => condition,
+                                    (val) => {
+                                      const updated = [...masterConditionsKn];
+                                      updated[index] = val;
+                                      updateMasterConditionsKnState(updated);
+                                    }
+                                  );
+                                }
+                              }}
                               onChange={(e) => {
-                                const updated = [...masterConditions];
-                                updated[index] = e.target.value;
-                                updateMasterConditionsState(updated);
+                                if (conditionsActiveLang === "en") {
+                                  const updated = [...masterConditions];
+                                  updated[index] = e.target.value;
+                                  updateMasterConditionsState(updated);
+                                } else {
+                                  const updated = [...masterConditionsKn];
+                                  updated[index] = e.target.value;
+                                  updateMasterConditionsKnState(updated);
+                                }
                               }}
                               className="w-full bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-300 outline-none resize-none border-b border-transparent focus:border-slate-200 dark:focus:border-slate-800 focus:bg-white dark:focus:bg-slate-950/40 p-1 rounded transition-all min-h-[60px]"
                             />
@@ -2583,27 +3111,48 @@ export default function App() {
                             type="button"
                             onClick={() => {
                               if (window.confirm("Are you sure you want to delete this global clause?")) {
-                                const updated = masterConditions.filter((_, idx) => idx !== index);
-                                updateMasterConditionsState(updated);
+                                if (conditionsActiveLang === "en") {
+                                  const updated = masterConditions.filter((_, idx) => idx !== index);
+                                  updateMasterConditionsState(updated);
+                                } else {
+                                  const updated = masterConditionsKn.filter((_, idx) => idx !== index);
+                                  updateMasterConditionsKnState(updated);
+                                }
                                 showToast("Global clause removed.", "success");
                               }
                             }}
-                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all opacity-0 group-hover:opacity-100"
+                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
                             title="Delete Global Clause"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       ))}
+                      {(conditionsActiveLang === "en" ? masterConditions : masterConditionsKn).length === 0 && (
+                        <div className="text-center py-6 text-slate-400 dark:text-slate-500 text-xs">
+                          No master clauses registered in this language.
+                        </div>
+                      )}
                     </div>
 
                     <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-4">
-                      <h3 className="text-sm font-bold text-slate-800 dark:text-white">{t("createNewMaster")}</h3>
+                      <h3 className="text-sm font-bold text-slate-800 dark:text-white">
+                        {conditionsActiveLang === "en" ? t("createNewMaster") : "ಹೊಸ ಮುಖ್ಯ ಷರತ್ತನ್ನು ಸೇರಿಸಿ (Create Kannada Clause)"}
+                      </h3>
                       <div className="flex gap-3">
                         <textarea
                           id="newMasterClauseText"
-                          placeholder={t("masterClausePlaceholder")}
-                          className="flex-grow bg-slate-50 border border-slate-205 focus:border-[#0f9770] focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 outline-none transition-all resize-none h-20 dark:bg-slate-950/60 dark:border-slate-800 dark:focus:border-emerald-500 dark:text-slate-200"
+                          onKeyDown={(e) => {
+                            if (conditionsActiveLang === "kn") {
+                              handleGeneralKannadaInput(
+                                e,
+                                () => e.target.value,
+                                (val) => { e.target.value = val; }
+                              );
+                            }
+                          }}
+                          placeholder={conditionsActiveLang === "en" ? t("masterClausePlaceholder") : "ಉದಾಹರಣೆಗೆ: ಸದರಿ ಮನೆಗೆ ಮುಂಗಡ ಹಣವಾಗಿ..."}
+                          className="flex-grow bg-slate-55 border border-slate-200 focus:border-[#0f9770] focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-sm rounded-xl px-3.5 py-2.5 outline-none transition-all resize-none h-20 dark:bg-slate-950/60 dark:border-slate-800 dark:focus:border-emerald-500 dark:text-slate-200"
                         />
                         <button
                           type="button"
@@ -2614,15 +3163,20 @@ export default function App() {
                               showToast("Please type a clause to add.", "error");
                               return;
                             }
-                            const updated = [...masterConditions, text];
-                            updateMasterConditionsState(updated);
+                            if (conditionsActiveLang === "en") {
+                              const updated = [...masterConditions, text];
+                              updateMasterConditionsState(updated);
+                            } else {
+                              const updated = [...masterConditionsKn, text];
+                              updateMasterConditionsKnState(updated);
+                            }
                             if (textarea) textarea.value = "";
                             showToast("New global clause added successfully!", "success");
                           }}
                           className="bg-[#0f9770] hover:bg-[#0d8563] text-white font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs self-end h-fit cursor-pointer"
                         >
                           <Plus className="w-4 h-4" />
-                          {t("addGlobalClause")}
+                          {conditionsActiveLang === "en" ? t("addGlobalClause") : "ಷರತ್ತನ್ನು ಸೇರಿಸಿ"}
                         </button>
                       </div>
                     </div>
@@ -2849,156 +3403,278 @@ export default function App() {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure parameters, brand details, and print outputs.</p>
                   </div>
 
-                  <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 space-y-6 max-w-2xl">
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Custom Layout Preferences</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    {/* Left Column: Preferences and Updates */}
+                    <div className="space-y-6">
+                      <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 space-y-6">
+                        <div className="space-y-4">
+                          <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Custom Layout Preferences</h3>
 
-                      <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Default Stamp Duty Sheet</span>
-                          <p className="text-[11px] text-slate-400">Set standard layout margins for printable pages</p>
+                          <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                            <div className="space-y-0.5">
+                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Default Stamp Duty Sheet</span>
+                              <p className="text-[11px] text-slate-400">Set standard layout margins for printable pages</p>
+                            </div>
+                            <select className="bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 text-xs font-bold rounded-lg px-2.5 py-1.5 outline-none text-slate-700 dark:text-slate-300">
+                              <option>Karnataka (Rs. 200 Stamp)</option>
+                              <option>Delhi (Rs. 100 Stamp)</option>
+                              <option>Maharashtra (Rs. 500 Stamp)</option>
+                            </select>
+                          </div>
+
+                          <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                            <div className="space-y-0.5">
+                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Export Word Formatting</span>
+                              <p className="text-[11px] text-slate-400">Apply custom fonts (e.g. Times New Roman, Arial)</p>
+                            </div>
+                            <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">Times New Roman (12pt)</span>
+                          </div>
+
+                          <div className="flex flex-col gap-2.5 pb-2">
+                            <div className="space-y-0.5">
+                              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Output Saving Directory</span>
+                              <p className="text-[11px] text-slate-400">Specify the local folder where generated PDF and Word documents will be saved</p>
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="text"
+                                value={outputDir}
+                                onChange={(e) => setOutputDir(e.target.value)}
+                                placeholder="e.g. C:\Users\Username\Documents"
+                                className="flex-grow bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleBrowseFolder}
+                                disabled={isBrowsing}
+                                className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition-all dark:bg-slate-950 dark:hover:bg-slate-900 dark:text-slate-350 dark:border-slate-800 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {isBrowsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Folder className="w-3.5 h-3.5" />}
+                                Browse Folder
+                              </button>
+                            </div>
+                          </div>
+
+                          <hr className="border-slate-100 dark:border-slate-800" />
+
+                          {/* Account details */}
+                          <div className="space-y-4 pt-2">
+                            <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Account Details</h3>
+
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold text-slate-605 dark:text-slate-300">User Name / Display Name</label>
+                              <input
+                                type="text"
+                                value={settingsFullName}
+                                onChange={(e) => setSettingsFullName(e.target.value)}
+                                placeholder="Enter your full name"
+                                className="bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold text-slate-605 dark:text-slate-300">Change Password</label>
+                              <input
+                                type="password"
+                                value={settingsPassword}
+                                onChange={(e) => setSettingsPassword(e.target.value)}
+                                placeholder="Enter new password (leave blank to keep current)"
+                                className="bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <select className="bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 text-xs font-bold rounded-lg px-2.5 py-1.5 outline-none text-slate-700 dark:text-slate-300">
-                          <option>Karnataka (Rs. 200 Stamp)</option>
-                          <option>Delhi (Rs. 100 Stamp)</option>
-                          <option>Maharashtra (Rs. 500 Stamp)</option>
-                        </select>
+
+                        <button
+                          onClick={handleSaveSettings}
+                          className="bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                        >
+                          Save Configuration
+                        </button>
                       </div>
 
-                      <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Export Word Formatting</span>
-                          <p className="text-[11px] text-slate-400">Apply custom fonts (e.g. Times New Roman, Arial)</p>
+                      <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-[#0f9770]" />
+                          <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Software Updates</h3>
                         </div>
-                        <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">Times New Roman (12pt)</span>
+
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Current Version</span>
+                            <p className="text-[11px] text-slate-400">Check online for the latest release</p>
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">
+                            v{updateInfo?.current || "—"}
+                          </span>
+                        </div>
+
+                        {updateInfo && updateInfo.enabled === false && (
+                          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Automatic updates are available only in the installed desktop app.
+                          </p>
+                        )}
+
+                        {updateInfo?.enabled && !updateInfo.available && (
+                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            You're running the latest version.
+                          </p>
+                        )}
+
+                        {updateInfo?.available && (
+                          <div className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800/50 rounded-xl p-3.5 space-y-2">
+                            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                              New version available: v{updateInfo.latest}
+                            </p>
+                            {updateInfo.notes && (
+                              <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 whitespace-pre-line">
+                                {updateInfo.notes}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={checkForUpdates}
+                            disabled={checkingUpdate || applyingUpdate}
+                            className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {checkingUpdate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            {checkingUpdate ? "Checking…" : "Check for Updates"}
+                          </button>
+
+                          {updateInfo?.available && (
+                            <button
+                              onClick={applyUpdate}
+                              disabled={applyingUpdate}
+                              className="bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              {applyingUpdate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                              {applyingUpdate ? "Updating…" : "Update Now & Restart"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: System Diagnostics */}
+                    <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 space-y-6">
+                      <div className="flex items-center gap-2 border-b pb-3 border-slate-100 dark:border-slate-800">
+                        <Activity className="w-5 h-5 text-[#0f9770]" />
+                        <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">System Diagnostics</h3>
                       </div>
 
-                      <div className="flex flex-col gap-2.5 pb-2">
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Output Saving Directory</span>
-                          <p className="text-[11px] text-slate-400">Specify the local folder where generated PDF and Word documents will be saved</p>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5 text-left">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Database Connection</span>
+                            <p className="text-[11px] text-slate-400">Local SQLite storage engine status</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/25 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/40">
+                            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">Connected</span>
+                          </div>
                         </div>
-                        <div className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            value={outputDir}
-                            onChange={(e) => setOutputDir(e.target.value)}
-                            placeholder="e.g. C:\Users\Username\Documents"
-                            className="flex-grow bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
-                          />
+
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5 text-left">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Session Security</span>
+                            <p className="text-[11px] text-slate-400">JSON Web Token authentication layer</p>
+                          </div>
+                          <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/25 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900/40 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Sec-Active
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5 text-left">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Active Profile</span>
+                            <p className="text-[11px] text-slate-400">Preparing credentials for print signs</p>
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2.5 py-1 rounded border dark:border-slate-800">
+                            Admin (Localhost)
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5 text-left">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Kannada Transliterator</span>
+                            <p className="text-[11px] text-slate-400">System keypress mapping listener</p>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border uppercase tracking-wide ${
+                            kannadaKeyboardActive
+                              ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/25 dark:border-emerald-900/40 dark:text-emerald-400"
+                              : "bg-slate-50 border-slate-200 text-slate-500 dark:bg-slate-950 dark:border-slate-800"
+                          }`}>
+                            {kannadaKeyboardActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                          <div className="space-y-0.5 text-left">
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Local OS Platform</span>
+                            <p className="text-[11px] text-slate-400">Desktop executable hosting platform</p>
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2.5 py-1 rounded border dark:border-slate-800 font-mono">
+                            Windows OS
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Quick tasks */}
+                      <div className="pt-2 space-y-3">
+                        <h4 className="text-xs font-extrabold text-slate-500 uppercase tracking-widest text-left">Diagnostic Utility</h4>
+                        <div className="grid grid-cols-2 gap-3">
                           <button
                             type="button"
-                            onClick={handleBrowseFolder}
-                            disabled={isBrowsing}
-                            className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition-all dark:bg-slate-950 dark:hover:bg-slate-900 dark:text-slate-350 dark:border-slate-800 flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={async () => {
+                              try {
+                                const res = await fetch("/api/diagnostics/db-health", {
+                                  headers: { "Authorization": `Bearer ${authToken}` }
+                                });
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  showToast(`DB Health: SQLite v${data.sqlite_version} connected. Size: ${data.size_kb}KB. Records: ${data.counts.agreements} agreements, ${data.counts.tenants} tenants.`, "success");
+                                } else {
+                                  const err = await res.json();
+                                  showToast(`DB Health Test Failed: ${err.detail || "Unknown error"}`, "error");
+                                }
+                              } catch (err) {
+                                showToast(`DB Health Test Error: ${err.message}`, "error");
+                              }
+                            }}
+                            className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:hover:bg-slate-900 dark:border-slate-800 dark:text-slate-355 text-[11px] font-bold px-3 py-2.5 rounded-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
                           >
-                            {isBrowsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Folder className="w-3.5 h-3.5" />}
-                            Browse Folder
+                            <Database className="w-3.5 h-3.5 text-slate-400" /> Test DB Engine
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                const res = await fetch("/api/diagnostics/run", {
+                                  headers: { "Authorization": `Bearer ${authToken}` }
+                                });
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  const d = data.diagnostics;
+                                  showToast(`Diagnostics: Writable: ${d.output_dir_writable ? "Yes" : "No"}, Word Capable: ${d.win32com_available ? "Yes" : "No"}, Free: ${d.disk.free_gb}GB, Nudi: ${d.kannada_nudi_support ? "OK" : "Error"}`, "success");
+                                } else {
+                                  const err = await res.json();
+                                  showToast(`Diagnostics Failed: ${err.detail || "Unknown error"}`, "error");
+                                }
+                              } catch (err) {
+                                showToast(`Diagnostics Error: ${err.message}`, "error");
+                              }
+                            }}
+                            className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-950 dark:hover:bg-slate-900 dark:border-slate-800 dark:text-slate-355 text-[11px] font-bold px-3 py-2.5 rounded-xl cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                          >
+                            <Terminal className="w-3.5 h-3.5 text-slate-400" /> Run Diagnostics
                           </button>
                         </div>
                       </div>
-
-                      <hr className="border-slate-100 dark:border-slate-800" />
-
-                      {/* Account details */}
-                      <div className="space-y-4 pt-2">
-                        <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Account Details</h3>
-
-                        <div className="flex flex-col gap-2">
-                          <label className="text-xs font-bold text-slate-605 dark:text-slate-300">User Name / Display Name</label>
-                          <input
-                            type="text"
-                            value={settingsFullName}
-                            onChange={(e) => setSettingsFullName(e.target.value)}
-                            placeholder="Enter your full name"
-                            className="bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <label className="text-xs font-bold text-slate-605 dark:text-slate-300">Change Password</label>
-                          <input
-                            type="password"
-                            value={settingsPassword}
-                            onChange={(e) => setSettingsPassword(e.target.value)}
-                            placeholder="Enter new password (leave blank to keep current)"
-                            className="bg-slate-50 border border-slate-250 focus:border-[#0f9770] focus:ring-4 focus:ring-emerald-500/10 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none transition-all dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleSaveSettings}
-                      className="bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
-                    >
-                      Save Configuration
-                    </button>
-                  </div>
-
-                  <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm dark:bg-slate-900/40 dark:border-slate-800 space-y-4 max-w-2xl">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#0f9770]" />
-                      <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">Software Updates</h3>
-                    </div>
-
-                    <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                      <div className="space-y-0.5">
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Current Version</span>
-                        <p className="text-[11px] text-slate-400">Check online for the latest release</p>
-                      </div>
-                      <span className="text-xs font-bold text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-1 rounded border dark:border-slate-800">
-                        v{updateInfo?.current || "—"}
-                      </span>
-                    </div>
-
-                    {updateInfo && updateInfo.enabled === false && (
-                      <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        Automatic updates are available only in the installed desktop app.
-                      </p>
-                    )}
-
-                    {updateInfo?.enabled && !updateInfo.available && (
-                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        You're running the latest version.
-                      </p>
-                    )}
-
-                    {updateInfo?.available && (
-                      <div className="bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800/50 rounded-xl p-3.5 space-y-2">
-                        <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                          New version available: v{updateInfo.latest}
-                        </p>
-                        {updateInfo.notes && (
-                          <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 whitespace-pre-line">
-                            {updateInfo.notes}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={checkForUpdates}
-                        disabled={checkingUpdate || applyingUpdate}
-                        className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {checkingUpdate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                        {checkingUpdate ? "Checking…" : "Check for Updates"}
-                      </button>
-
-                      {updateInfo?.available && (
-                        <button
-                          onClick={applyUpdate}
-                          disabled={applyingUpdate}
-                          className="bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {applyingUpdate && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          {applyingUpdate ? "Updating…" : "Update Now & Restart"}
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -3599,7 +4275,16 @@ export default function App() {
                     <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">{t("createCustomClause")}</span>
                     <textarea
                       id="sidebarClauseText"
-                      placeholder="E.g., The TENANT should maintain the premises clean..."
+                      onKeyDown={(e) => {
+                        if (selectedTemplateId === -1) {
+                          handleGeneralKannadaInput(
+                            e,
+                            () => e.target.value,
+                            (val) => { e.target.value = val; }
+                          );
+                        }
+                      }}
+                      placeholder={selectedTemplateId === -1 ? "ಉದಾಹರಣೆಗೆ: ಸದರಿ ಮನೆಗೆ ಮುಂಗಡ ಹಣವಾಗಿ..." : "E.g., The TENANT should maintain the premises clean..."}
                       className="w-full bg-white border border-slate-200 focus:border-[#0f9770] text-xs rounded-xl px-3 py-2 outline-none transition-all resize-none h-14 dark:bg-slate-950/60 dark:border-slate-850 dark:text-slate-200"
                     />
                     <div className="flex justify-between items-center">
@@ -3633,8 +4318,13 @@ export default function App() {
 
                           const saveToMaster = document.getElementById("sidebarSaveToMasterCheckbox")?.checked;
                           if (saveToMaster) {
-                            const updatedMaster = [...masterConditions, text];
-                            updateMasterConditionsState(updatedMaster);
+                            if (selectedTemplateId === -1) {
+                              const updatedMaster = [...masterConditionsKn, text];
+                              updateMasterConditionsKnState(updatedMaster);
+                            } else {
+                              const updatedMaster = [...masterConditions, text];
+                              updateMasterConditionsState(updatedMaster);
+                            }
                             showToast("Clause added to agreement and global registry!", "success");
                           } else {
                             showToast("Clause added to this agreement.", "success");
@@ -3652,8 +4342,10 @@ export default function App() {
                       type="button"
                       onClick={() => {
                         if (window.confirm("Are you sure you want to reset all conditions for this agreement back to the global defaults?")) {
-                          const resetConditions = masterConditions.map((masterText, idx) => ({
-                            id: `master-${idx}-${Date.now()}`,
+                          const refMasterConditions = selectedTemplateId === -1 ? masterConditionsKn : masterConditions;
+                          const idPrefix = selectedTemplateId === -1 ? "masterKn" : "master";
+                          const resetConditions = refMasterConditions.map((masterText, idx) => ({
+                            id: `${idPrefix}-${idx}-${Date.now()}`,
                             text: masterText,
                             checked: true
                           }));
@@ -3752,33 +4444,13 @@ export default function App() {
                             <h3 className="font-bold mb-3 underline">ಕರಾರಿನ ಷರತ್ತುಗಳು:</h3>
 
                             <ol className="list-decimal pl-6 space-y-3">
-                              <li>
-                                ಸದರಿ ಮನೆಗೆ ಮುಂಗಡ (ಭದ್ರತಾ ಠೇವಣಿ) ಹಣವಾಗಿ ರೂ.{renderHighlight("DEPOSIT_AMOUNT")}/- ({renderHighlight("DEPOSIT_AMOUNT_WORDS")}) ರೂಪಾಯಿಗಳನ್ನು ನಿಮಗೆ ಈ ಕೆಳಕಂಡ ಸಾಕ್ಷಿದಾರರ ಸಮಕ್ಷಮ ನಗದು ರೂಪದಲ್ಲಿ ಪಾವತಿಮಾಡಿರುತ್ತೇನೆ.  ಸದರಿ ಮುಂಗಡ ಹಣಕ್ಕೆ ತಾವು ಯಾವುದೇ ರೀತಿಯ ಬಡ್ಡಿಯನ್ನು ಕೊಡಬೇಕಾಗಿಲ್ಲ ಮತ್ತು  ಸದರಿ ಹಣವನ್ನು  ಮನೆಯನ್ನು ಖಾಲೀ ಮಾಡಿ ನಿಮ್ಮ ಸ್ವಾಧೀನಕ್ಕೆ ಕೊಡುವಾಗ ಒಂದೇ ಕಂತಿನಲ್ಲಿ ಹಿಂದಿರುಗಿಸತಕ್ಕದ್ದು.
-                              </li>
-                              <li>
-                                ಸದರಿ ಮನೆಗೆ ಬಾಡಿಗೆಯಾಗಿ ರೂ.{renderHighlight("RENT_AMOUNT")}/- ({renderHighlight("RENT_AMOUNT_WORDS")}) ರೂಪಾಯಿಗಳನ್ನು ನಿಗಧಿ ಮಾಡಿದ್ದು,  ಸದರಿ ಬಾಡಿಗೆಯನ್ನು ಪ್ರತಿ ಮಾಹೇ {renderHighlight("RENT_PAYMENT_DAY")} ನೇ ದಿನಾಂಕದ ಒಳಗೆ ತಪ್ಪದೇ ಪಾವತಿಮಾಡುತ್ತೇನೆ.
-                              </li>
-                              <li>
-                                ಮೇಲ್ಕಂಡ ಸದರಿ ಮನೆಗೆ ದಿನಾಂಕ: {renderHighlight("LEASE_START_DATE")} ರಿಂದ {renderHighlight("LEASE_PERIOD_NUM")} ({renderHighlight("LEASE_PERIOD")}) ತಿಂಗಳು ಅವಧಿಯನ್ನು ಗೊತ್ತುಪಡಿಸಲಾಗಿರುತ್ತದೆ.
-                              </li>
-                              <li>
-                                ಸದರಿ ಮನೆಯಲ್ಲಿ ಉಪಯೋಗಿಸುವ ವಿಧ್ಯುತ್ ಬಿಲ್ಲನ್ನು ಪ್ರತಿ ತಿಂಗಳು ವಿಧ್ಯುತ್ ಇಲಾಖೆಗೆ ಕಟ್ಟುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.
-                              </li>
-                              <li>
-                                ಸದರಿ ಮನೆಯನ್ನು ವಾಯಿದೆಯನಂತರ ಬಾಡಿಗೆ ಮುಂದುವರೆದಲ್ಲಿ ಶೇಖಡ {renderHighlight("ESCALATION_RATE")} ಹೆಚ್ಚಿನ ಬಾಡಿಗೆ ಕೊಟ್ಟು ಹೊಸ ಕರಾರನ್ನು ಮಾಡಿಕೊಂಡು ಮುಂದುವರಿಯುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ.
-                              </li>
-                              <li>
-                                ಸದರಿ ಮನೆಯನ್ನು ನನ್ನ ವಾಸಕ್ಕೆ ಮಾತ್ರ ಉಪಯೋಗಿಸುವುದಾಗಿ ಮತ್ತು ನಾನು  ಯಾವುದೇ ಕಾರಣಕ್ಕೂ ಯಾರಿಗೂ ಒಳಬಾಡಿಗೆಗೆ, ಶಿಕ್ಮಿ ಬಾಡಿಗೆಗೆ ಕೊಡುವುದಿಲ್ಲವೆಂದು ಹಾಗೂ ಕಾನೂನು ಬಾಹಿರ ಚಟುವಟಿಕೆಗಳಿಗೆ ಗುರಿಪಡಿಸುದಿಲ್ಲವೆಂದು ಒಪ್ಪಿರುತ್ತೇನೆ.
-                              </li>
-                              <li>
-                                ಸದರಿ  ಮನೆಯನ್ನು ಖಾಲೀ  ಮಾಡುವ ಅಥವಾ  ಖಾಲೀ  ಮಾಡಿಸುವ ಸಂದರ್ಭ ಬಂದಲ್ಲಿ ಪರಸ್ಪರ {renderHighlight("LEASE_PERIOD_NUM")} ತಿಂಗಳ ಅವಧಿ ಮುಂಚಿತ {renderHighlight("NOTICE_PERIOD_NUM")} ({renderHighlight("NOTICE_PERIOD")}) ತಿಂಗಳ ಮುಂಚಿತವಾಗಿ ತಿಳಿಸತಕ್ಕದ್ದು.
-                              </li>
-                              <li>
-                                ಸದರಿ  ಮನೆಯಲ್ಲಿ  ಯಾವುದೇ  ತಂಟೆ ತಕರಾರು ಬಂದಲ್ಲಿ ಮಾಲೀಕರಾದ ನೀವು ನಮ್ಮನ್ನು ಅವಧಿಯ ಮುಂಚಿತವಗಿ ಖಾಲಿ ಮಾಡಿಸುವುದಕ್ಕೆ ಸಂಪೂರ್ಣ ಜವಬ್ದಾರನಾಗಿರುತ್ತೀರಿ. ಹಾಗೂ ಈ ಕರಾರು ಪತ್ರದ ಅಸಲು ಪ್ರತಿಯಾಗಲೀ ನಕಲು ಪ್ರತಿಯಾಗಲೀ ಅಡಮಾನವಿಟ್ಟು ಸಾಲ ಪಡೆಯುವಂತಿಲ್ಲ.
-                              </li>
-                              <li>
-                                ಸದರಿ ಮನೆಯನ್ನು ನಾನು ಬಾಡಿಗೆಗೆ ಪಡೆಯುವಾಗ ಯಾವ ಸ್ಥಿತಿಯಲ್ಲಿ ಪಡೆದಿರುತ್ತೇನೊ, ಅದೇ ರೀತಿ ನಾನು ಸಹ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸಿ ಹಿಂದಿರುಗಿಸುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ. ಡ್ಯಾಮೇಜುಗಳನ್ನು ಸರಿಪಡಿಸಿಕೊಡುವುದಾಗಿ ಒಪ್ಪಿರುತ್ತೇನೆ, ಸದರಿ ಮನೆಗೆ ಪೈಂಟಿಂಗ್ ಮಾಡಿಸುವ ವೆಚ್ದ ತಮ್ಮ ಬಳಿ ಇರುವ ಮುಂಗಡ ಹಣದಲ್ಲಿ ಮುಟ್ಟುಗೋಲು ಹಾಕಿಕೊಳ್ಳಲು ಒಪ್ಪಿರುತ್ತೇನೆ ಹಾಗೂ  ಸದರಿ ಕರಾರು ಪತ್ರದ  ಅಸಲು ಪ್ರತಿಯನ್ನು ಬಾಡಿಗೆದಾರರಾದ ನನ್ನ ವಶದಲ್ಲಿ ಮತ್ತು ನಕಲು ಪ್ರತಿಯನ್ನು ಮಾಲೀಕರಾದ ನಿಮ್ಮ ವಶದಲ್ಲಿ ಇಟ್ಟುಕೊಂಡಿರಲು ನಾನು ಒಪ್ಪಿ ತಮಗೂ ಒಪ್ಪಿಸಿ ಬರೆದುಕೊಟ್ಟ ವಾಸದ  ಮನೆ ಬಾಡಿಗೆ ಒಪ್ಪಂದದ  ಕರಾರು ಪತ್ರದ ಸಹಿ.
-                              </li>
+                              {agreementConditions
+                                .filter(cond => cond.checked)
+                                .map((cond, idx) => (
+                                  <li key={cond.id || idx}>
+                                    {renderClauseWithHighlights(cond.text)}
+                                  </li>
+                                ))}
                             </ol>
 
                             <div className="mt-10 grid grid-cols-2 gap-8 text-center pt-8 border-t border-slate-100">
@@ -4102,6 +4774,17 @@ export default function App() {
                     <FileDown className="w-3.5 h-3.5" />
                     {t("downloadPdf")}
                   </a>
+
+                  <button
+                    type="button"
+                    onClick={handleShareWhatsApp}
+                    disabled={!pdfGenerated || isGenerating}
+                    className={`flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-55 bg-white text-slate-655 transition-colors ${!pdfGenerated || isGenerating ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                      } dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200`}
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-emerald-500" />
+                    Share on WhatsApp
+                  </button>
                 </div>
               </div>
             </section>
@@ -4187,6 +4870,134 @@ export default function App() {
                 className="bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-[0.97] cursor-pointer"
               >
                 {t("generateSave")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm dark:bg-slate-950/80 transition-all duration-300">
+          <div className="bg-white border border-slate-200/80 dark:bg-slate-900 dark:border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-6 transform transition-all scale-100 duration-200">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div className="space-y-1 text-left">
+                <h3 className="text-base font-extrabold text-slate-855 dark:text-white flex items-center gap-2">
+                  <Share2 className="w-5 h-5 text-[#0f9770]" />
+                  Share Rental Agreement
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Choose how you want to send the document to your tenant.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="text-slate-400 hover:text-slate-655 dark:text-slate-500 dark:hover:text-slate-300 text-sm font-bold cursor-pointer transition-colors p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Warning Alert */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 text-left dark:bg-amber-950/20 dark:border-amber-900/40">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-amber-800 dark:text-amber-300">Local Application Mode</h4>
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-normal">
+                  Since RentalPro is running on your computer, sharing a direct link (like <code>127.0.0.1</code>) will not open on your tenant's phone or computer.
+                </p>
+              </div>
+            </div>
+
+            {/* Method 1: Send File (Recommended) */}
+            <div className="border border-slate-150 rounded-2xl p-4 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-950/20 text-left space-y-3.5">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center bg-[#0f9770] text-white rounded-full w-5 h-5 text-xs font-bold">1</span>
+                <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Recommended: Send PDF File directly
+                </h4>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a
+                  href={downloadUrls.pdf}
+                  download={`${editorTitle}.pdf`}
+                  onClick={() => showToast("PDF Download started...", "info")}
+                  className="flex items-center justify-center gap-2 bg-[#0f9770] hover:bg-[#0d8563] text-white text-xs font-bold px-4 py-3 rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-500/10 active:scale-95"
+                >
+                  <FileDown className="w-4 h-4" />
+                  1. Download PDF File
+                </a>
+
+                <a
+                  href="https://web.whatsapp.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl transition-all cursor-pointer dark:bg-slate-700 dark:hover:bg-slate-600"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  2. Open WhatsApp Web
+                </a>
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 italic">
+                Tip: After downloading the PDF, open WhatsApp and simply drag & drop the downloaded file into the tenant's chat.
+              </p>
+            </div>
+
+            {/* Method 2: Share Link (Advanced/Local Network) */}
+            <div className="border border-slate-150 rounded-2xl p-4 text-left space-y-3.5 dark:border-slate-850">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center bg-slate-400 text-white rounded-full w-5 h-5 text-xs font-bold">2</span>
+                <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Alternative: Share Local URL Link
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Use this link only if your tenant is on the same Wi-Fi network, or you have set up a public port-forwarding/tunnel (e.g. ngrok).
+              </p>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}${downloadUrls.pdf}`}
+                  className="flex-grow bg-slate-55 border border-slate-200 text-slate-600 text-xs rounded-xl px-3 py-2.5 outline-none dark:bg-slate-950 dark:border-slate-800 dark:text-slate-400 font-mono select-all"
+                />
+                
+                <button
+                  type="button"
+                  onClick={handleCopyShareLink}
+                  className="flex items-center gap-1.5 bg-slate-105 hover:bg-slate-200 text-slate-755 font-bold px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300"
+                >
+                  {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  {copiedLink ? "Copied" : "Copy"}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const shareText = `Hi, please find the Rental Agreement PDF for '${editorTitle}' here: ${window.location.origin}${downloadUrls.pdf}`;
+                  const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                  window.open(shareUrl, "_blank");
+                }}
+                className="w-full flex items-center justify-center gap-2 border border-slate-200 hover:bg-slate-55 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer dark:border-slate-800 dark:hover:bg-slate-800 dark:text-slate-350"
+              >
+                <Share2 className="w-4 h-4 text-emerald-500" />
+                Send Link via WhatsApp anyway
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="px-5 py-2.5 border border-slate-200 hover:border-slate-300 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-800 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>
